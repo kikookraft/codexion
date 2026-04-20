@@ -1,5 +1,6 @@
 SRC_FILES=codexion
 SRC_TARGETS=$(addsuffix .o, $(SRC_FILES))
+CFLAGS=-Wall -Wextra -Werror
 
 HEADERS=coders/inc.h
 HEADERS_DIRS=-I coders -I headers
@@ -7,10 +8,10 @@ HEADERS_DIRS=-I coders -I headers
 NAME=codexion
 
 $(NAME): $(SRC_TARGETS)
-	cc -Wall -Wextra -Werror $(SRC_TARGETS) $(HEADERS_DIRS) -o $@
+	cc $(CFLAGS) $(SRC_TARGETS) $(HEADERS_DIRS) -o $@
 
-src/%.o: src/%.c $(HEADERS)
-	cc -c -Wall -Wextra -Werror $(HEADERS_DIRS) $< -o $@
+%.o: %.c $(HEADERS)
+	cc -c $(CFLAGS) $(HEADERS_DIRS) $< -o $@
 
 all: $(NAME)
 
