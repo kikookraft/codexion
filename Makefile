@@ -7,7 +7,7 @@ HEADERS_DIRS=-I coders -I headers
 NAME=codexion
 
 $(NAME): $(SRC_TARGETS)
-	cc -Wall -Wextra -Werror $(SRC_TARGETS) coders/inc.a $(HEADERS_DIRS) -o $@
+	cc -Wall -Wextra -Werror $(SRC_TARGETS) $(HEADERS_DIRS) -o $@
 
 src/%.o: src/%.c $(HEADERS)
 	cc -c -Wall -Wextra -Werror $(HEADERS_DIRS) $< -o $@
@@ -18,11 +18,14 @@ clean:
 	rm -f $(SRC_TARGETS)
 
 fclean: clean
-	rm -f coders/inc.a $(NAME)
+	rm -f $(NAME)
 
 re: fclean all
+
+run: $(NAME)
+	./$(NAME)
 
 coders/%.o: coders/%.c coders/inc.h
 	cd coders && make
 
-.PHONY: all clean fclean re
+.PHONY: all clean fclean re run
