@@ -1,5 +1,22 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   test_thread.c                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2026/04/20 16:45:49 by tobesson          #+#    #+#             */
+/*   Updated: 2026/04/20 16:53:30 by tobesson         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
 
+// test files for threading things
+#include <stdio.h>
+#include <unistd.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <string.h>
 
 void* foo(void* arg) {
 	int i;
