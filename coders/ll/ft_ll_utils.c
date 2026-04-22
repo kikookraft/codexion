@@ -6,35 +6,32 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 14:20:41 by tobesson          #+#    #+#             */
-/*   Updated: 2026/01/20 17:03:37 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/04/22 16:44:25 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "push_swap.h"
+#include "../inc.h"
 
-// exchange two element of ll1 & ll2
-void	ll_exchange(t_ll **ll1, t_ll **ll2)
+int	heap_peek(t_req_heap *heap, t_request *out)
 {
-	int	temp;
-
-	if (!*ll1 || !*ll2)
-		return ;
-	temp = (*ll1)->value;
-	(*ll1)->value = (*ll2)->value;
-	(*ll2)->value = temp;
+	if (!heap || !out || heap->size == 0)
+		return (1);
+	*out = heap->arr[0];
+	return (0);
 }
 
-// get the node at given index
-t_ll	*get_index(int index, t_ll **ll)
+int	request_cmp(const t_request *a, const t_request *b, t_sched_mode mode)
 {
-	int		i;
-	t_ll	*temp;
-
-	temp = *ll;
-	i = -1;
-	while (++i < index && temp)
-		temp = temp->next;
-	if (!temp)
-		return (NULL);
-	return (temp);
+	if (mode == COD_SCHED_EDF)
+	{
+		if (a->deadline_ms < b->deadline_ms)
+			return (-1);
+		if (a->deadline_ms > b->deadline_ms)
+			return (1);
+	}
+	if (a->seq < b->seq)
+		return (-1);
+	if (a->seq > b->seq)
+		return (1);
+	return (0);
 }

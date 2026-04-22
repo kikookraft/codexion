@@ -3,40 +3,25 @@
 /*                                                        :::      ::::::::   */
 /*   ft_ll_size.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rlaurens <rlaurens@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 12:29:56 by tobesson          #+#    #+#             */
-/*   Updated: 2026/01/22 13:57:41 by rlaurens         ###   ########.fr       */
+/*   Updated: 2026/04/22 16:44:24 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "push_swap.h"
+#include "../inc.h"
 
-// return the size of the linked list
-int	ll_size(t_ll **ll)
+size_t	heap_size(t_req_heap *heap)
 {
-	t_ll	*temp;
-	int		size;
-
-	temp = *ll;
-	size = 0;
-	while (temp)
-	{
-		size++;
-		temp = temp->next;
-	}
-	return (size);
+	if (!heap)
+		return (0);
+	return (heap->size);
 }
 
-// return the last node of the linked list
-t_ll	**get_last_node(t_ll **ll)
+int	heap_is_empty(t_req_heap *heap)
 {
-	t_ll	**temp;
-
-	if (!*ll)
-		return (NULL);
-	temp = ll;
-	while ((*temp)->next)
-		temp = &(*temp)->next;
-	return (temp);
+	if (!heap)
+		return (1);
+	return (heap->size == 0);
 }

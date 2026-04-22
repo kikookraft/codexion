@@ -3,29 +3,21 @@
 /*                                                        :::      ::::::::   */
 /*   ft_ll_free.c                                       :+:      :+:    :+:   */
 /*                                                    +:+ +:+         +:+     */
-/*   By: rlaurens <rlaurens@student.42.fr>          +#+  +:+       +#+        */
+/*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/01/15 12:13:40 by tobesson          #+#    #+#             */
-/*   Updated: 2026/01/22 14:11:01 by rlaurens         ###   ########.fr       */
+/*   Updated: 2026/04/22 16:44:20 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "push_swap.h"
+#include "../inc.h"
 
-// free all nodes in the linked list and
-void	ll_free(t_ll **ll)
+void	heap_destroy(t_req_heap *heap)
 {
-	t_ll	*temp;
-	t_ll	*next;
-
-	if (!ll)
+	if (!heap)
 		return ;
-	temp = *ll;
-	while (temp)
-	{
-		next = temp->next;
-		free(temp);
-		temp = next;
-	}
-	free(ll);
+	free(heap->arr);
+	heap->arr = NULL;
+	heap->size = 0;
+	heap->capacity = 0;
 }
