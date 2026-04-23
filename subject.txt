@@ -4,7 +4,7 @@ masters you
 Summary: Race against time in this thrilling concurrency challenge! Orchestrate
 multiple coders competing for limited USB dongles using POSIX threads, mutexes, and
 smart scheduling—master resource synchronization before burnout strikes.
-Version: 1.1
+Version: 1.3
 Contents
 I Introduction 2
 II AI Instructions 3
@@ -239,7 +239,8 @@ for simplicity.
 Chapter VI
 Mandatory part
 Program Name codexion
-Files to Submit Makefile, *.c, *.h in directory coders/
+Files to Submit Makefile at the root, *.c and *.h is the folder of
+your choice
 Makefile NAME, all, clean, fclean, re
 Arguments number_of_coders time_to_burnout time_to_compile
 time_to_debug
@@ -267,12 +268,15 @@ used to manage waiting queues.
 • Dongle cooldown is mandatory: after a coder releases a dongle, the dongle
 cannot be taken again until dongle_cooldown milliseconds have elapsed.
 • Fair arbitration is mandatory: when multiple coders request the same dongle,
-the dongle must grant access according to scheduler.
 11
 Codexion Master the race for resources before the deadline masters you
+the dongle must grant access according to scheduler.
 With fifo, serve requests in arrival order.
 With edf, serve the coder with the earliest burnout deadline (i.e., last_compile_start
 + time_to_burnout).
+Note: Due to timestamp precision, equal deadlines may rarely occur
+in practice. The tie-breaker rule is required to ensure a fully
+deterministic EDF policy, even in edge cases.
 • The program must guarantee liveness: coders should not starve under edf schedul-
 ing, provided the parameters are feasible.
 • A separate monitor thread must detect burnout precisely and stop the simulation.
@@ -282,8 +286,8 @@ The burnout log must be printed within 10 ms of the actual burnout time.
 • The simulation stops either when a coder burns out or when every coder has com-
 piled at least number_of_compiles_required times.
 • Your code must compile with -Wall -Wextra -Werror -pthread.
-• You must implement a priority queue (heap) for FIFO/EDF scheduling (C89 has
-no standard library for this).
+• You must implement a priority queue (heap) for FIFO/EDF scheduling (no stan-
+dard library priority queue may be used).
 • All memory must be properly allocated and freed (no memory leaks).
 Example of simulation run:
 0 1 has taken a dongle
