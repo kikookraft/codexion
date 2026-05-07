@@ -1,32 +1,29 @@
-SRC_FILES=codexion
-SRC_TARGETS=$(addsuffix .o, $(SRC_FILES))
-CFLAGS=-Wall -Wextra -Werror -pthread
+NAME = codexion
 
-HEADERS=coders/inc.h
-HEADERS_DIRS=-I coders -I headers
+CC = cc
+CFLAGS = -Wall -Wextra -Werror -pthread
+INCLUDES = -Icoders
 
-NAME=codexion
+SRC = \
+	codexion.c \
+	coders/parse.c
 
-$(NAME): $(SRC_TARGETS) $(CODERS_OBJ)
-$(NAME): $(SRC_TARGETS)
-	cc $(CFLAGS) $(SRC_TARGETS) $(HEADERS_DIRS) -o $@
-
-%.o: %.c $(HEADERS)
-	cc -c $(CFLAGS) $(HEADERS_DIRS) $< -o $@
+OBJ = $(SRC:.c=.o)
 
 all: $(NAME)
 
+$(NAME): $(OBJ)
+	$(CC) $(CFLAGS) $(OBJ) $(INCLUDES) -o $(NAME)
+
+%.o: %.c coders/inc.h
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+
 clean:
-	rm -f $(SRC_TARGETS)
+	rm -f $(OBJ)
 
 fclean: clean
 	rm -f $(NAME)
 
 re: fclean all
 
-run: $(NAME)
-	./$(NAME) 1 2 3 4 5 6 7 edf
-
-.PHONY: all clean fclean re run
-
-.PHONY: all clean fclean re run
+.PHONY: all clean fclean re
