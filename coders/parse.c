@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/07 14:54:04 by tobesson          #+#    #+#             */
-/*   Updated: 2026/05/07 16:35:13 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/05/15 15:09:23 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -41,7 +41,6 @@ int	check_args(int argc, char **argv)
 Show usefull help based on what is invalidated on he funtion above
 always return 1 (error and exit)
 */
-
 static const char	*get_error_name(int id)
 {
 	if (id == 1)
@@ -61,6 +60,9 @@ static const char	*get_error_name(int id)
 	return (NULL);
 }
 
+/*
+Print the correct error message based on what is invalidated
+*/
 int	show_help(int helpId, int argc, char **argv)
 {
 	if (helpId == 0)
