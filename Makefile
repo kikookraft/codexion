@@ -7,7 +7,8 @@ INCLUDES = -Icoders
 SRC = \
 	codexion.c \
 	coders/parse.c \
-	utils/time.c
+	utils/time.c \
+	utils/init.c
 
 OBJ = $(SRC:.c=.o)
 

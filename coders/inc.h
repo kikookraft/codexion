@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/05/18 16:23:41 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/05/19 15:48:33 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,16 +31,24 @@ size_t	get_time(void);
 void	umimir(size_t time);
 void	mimir(size_t time);
 
+/* ---------- FORWARD DECLARATIONS ----------*/
+typedef struct s_coder t_coder;
+typedef struct s_dongle t_dongle;
+typedef struct s_sim t_sim;
+
 /* ---------- STRUCTS & UTILS ----------*/
 
 /* Scheduler mode used when for arbitration queue. */
 typedef enum e_scheduler
 {
-	MODE_FIFO,
-	MODE_EDF
+	FIFO,
+	EDF
 }	t_scheduler;
 
-/* dongle structure */
+/* dongle structure
+contain a small heap of the two coders that can have acces to this dongle
+sorted based on the scheduler
+*/
 typedef struct s_dongle
 {
 	int				id;
@@ -48,7 +56,7 @@ typedef struct s_dongle
 	pthread_mutex_t	dongle_lock;
 	pthread_cond_t	dongle_cond;
 	size_t			last_used;
-	int				*waiting_ids;
+	t_coder			*waiting;
 }	t_dongle;
 
 /* Simulation structure */
@@ -79,3 +87,9 @@ typedef struct s_coder
 	t_sim			*sim;
 	pthread_mutex_t	coder_lock;
 }	t_coder;
+
+// ----- init.c -----
+t_coder		*init_waitings(void);
+t_dongle	*init_dongle(int nb_coders);
+t_scheduler	init_scheduler(char *argv[]);
+t_sim		*init_sim(char *argv[]);
