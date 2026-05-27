@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/05/19 15:48:33 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/05/27 15:25:13 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -28,8 +28,7 @@ int		show_help(int helpId, int argc, char **argv);
 
 // ----- time.c -----
 size_t	get_time(void);
-void	umimir(size_t time);
-void	mimir(size_t time);
+void	msleep(size_t time);
 
 /* ---------- FORWARD DECLARATIONS ----------*/
 typedef struct s_coder t_coder;
@@ -75,6 +74,7 @@ typedef struct s_sim
 	unsigned int	dongle_cooldown;
 	int				is_running;
 	size_t			start_time;
+	t_coder			*coders;
 }	t_sim;
 
 /* coders structure */
@@ -93,3 +93,7 @@ t_coder		*init_waitings(void);
 t_dongle	*init_dongle(int nb_coders);
 t_scheduler	init_scheduler(char *argv[]);
 t_sim		*init_sim(char *argv[]);
+
+// ----- routine.c -----
+void	*coder_routine(void *arg);
+int		start_simulation(t_sim *sim);

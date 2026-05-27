@@ -7,6 +7,7 @@ INCLUDES = -Icoders
 SRC = \
 	codexion.c \
 	coders/parse.c \
+	coders/routine.c \
 	utils/time.c \
 	utils/init.c
 
