@@ -9,7 +9,8 @@ SRC = \
 	coders/parse.c \
 	coders/routine.c \
 	utils/time.c \
-	utils/init.c
+	utils/init.c \
+	utils/queue.c
 
 OBJ = $(SRC:.c=.o)
 

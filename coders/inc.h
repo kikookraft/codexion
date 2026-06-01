@@ -55,7 +55,8 @@ typedef struct s_dongle
 	pthread_mutex_t	dongle_lock;
 	pthread_cond_t	dongle_cond;
 	size_t			last_used;
-	t_coder			*waiting;
+	t_coder			*waiting[2];
+	int				queue_size;
 }	t_dongle;
 
 /* Simulation structure */
@@ -89,10 +90,13 @@ typedef struct s_coder
 }	t_coder;
 
 // ----- init.c -----
-t_coder		*init_waitings(void);
 t_dongle	*init_dongle(int nb_coders);
 t_scheduler	init_scheduler(char *argv[]);
 t_sim		*init_sim(char *argv[]);
+
+// ----- queue.c -----
+void	enqueue_coder(t_dongle *dongle, t_coder *coder);
+void	remove_coder(t_dongle *dongle, t_coder *coder);
 
 // ----- routine.c -----
 void	*coder_routine(void *arg);
