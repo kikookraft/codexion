@@ -8,6 +8,7 @@ SRC = \
 	codexion.c \
 	coders/parse.c \
 	coders/routine.c \
+	coders/action.c \
 	utils/time.c \
 	utils/init.c \
 	utils/queue.c

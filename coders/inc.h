@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/05/27 15:25:13 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/01 17:19:04 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,18 +22,10 @@
 
 #define NB_ARGS 9
 
-// ----- parse.c -----
-int		check_args(int argc, char **argv);
-int		show_help(int helpId, int argc, char **argv);
-
-// ----- time.c -----
-size_t	get_time(void);
-void	msleep(size_t time);
-
 /* ---------- FORWARD DECLARATIONS ----------*/
-typedef struct s_coder t_coder;
-typedef struct s_dongle t_dongle;
-typedef struct s_sim t_sim;
+typedef struct s_coder	t_coder;
+typedef struct s_dongle	t_dongle;
+typedef struct s_sim	t_sim;
 
 /* ---------- STRUCTS & UTILS ----------*/
 
@@ -89,15 +81,32 @@ typedef struct s_coder
 	pthread_mutex_t	coder_lock;
 }	t_coder;
 
+/* ----------- PROTOTYPES ----------- */
+
+// ----- parse.c -----
+int			check_args(int argc, char **argv);
+int			show_help(int helpId, int argc, char **argv);
+
+// ----- time.c -----
+size_t		get_time(void);
+void		msleep(size_t time);
+
 // ----- init.c -----
 t_dongle	*init_dongle(int nb_coders);
 t_scheduler	init_scheduler(char *argv[]);
 t_sim		*init_sim(char *argv[]);
 
 // ----- queue.c -----
-void	enqueue_coder(t_dongle *dongle, t_coder *coder);
-void	remove_coder(t_dongle *dongle, t_coder *coder);
+void		enqueue_coder(t_dongle *dongle, t_coder *coder);
+void		remove_coder(t_dongle *dongle, t_coder *coder);
+
+// ----- action.c -----
+void		*coder_routine(void *arg);
+void		compile(t_coder *coder, t_dongle *l_dongle, t_dongle *r_dongle);
+void		debug(t_coder *coder);
+void		refactor(t_coder *coder);
 
 // ----- routine.c -----
-void	*coder_routine(void *arg);
-int		start_simulation(t_sim *sim);
+int			start_simulation(t_sim *sim);
+void		take_dongle(t_coder *coder, t_dongle *dongle);
+void		release_dongle(t_dongle *dongle);
