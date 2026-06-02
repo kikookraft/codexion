@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 14:35:48 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/01 15:11:05 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/02 11:57:41 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,7 +17,7 @@ t_dongle	*init_dongle(int nb_coders)
 	t_dongle	*dongle;
 	int			i;
 
-	dongle = malloc(sizeof(t_dongle)*nb_coders);
+	dongle = malloc(sizeof(t_dongle) * nb_coders);
 	if (!dongle)
 		return (NULL);
 	i = -1;

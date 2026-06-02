@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 00:00:00 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/01 17:03:21 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/02 12:02:07 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -14,9 +14,6 @@
 
 void	take_dongle(t_coder *coder, t_dongle *dongle)
 {
-	struct timeval	tv;
-	struct timespec	ts;
-
 	pthread_mutex_lock(&dongle->dongle_lock);
 	enqueue_coder(dongle, coder);
 	while (1)

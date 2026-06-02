@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/01 17:19:04 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/02 12:01:02 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -110,3 +110,4 @@ void		refactor(t_coder *coder);
 int			start_simulation(t_sim *sim);
 void		take_dongle(t_coder *coder, t_dongle *dongle);
 void		release_dongle(t_dongle *dongle);
+void		dongle_take_wait(t_dongle *dongle, t_coder *coder);

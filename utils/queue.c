@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 12:00:00 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/01 15:06:45 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/02 11:59:29 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,25 +34,16 @@ static int	should_swap(t_coder *c1, t_coder *c2, t_scheduler scheduler)
 
 	if (scheduler == FIFO)
 	{
-		// FIFO: arrival order. But if they arrive at the exact same moment, tie break by id.
-		// Since enqueue happens sequentially, c1 was here first. 
-		// We only swap if we REALLY enforce tie breaking on same arrival time, but realistically 
-		// the one already in the queue `c1` was requested earlier. 
-		// But let's follow the strict "tie break by ID" rule even for FIFO if somehow simultaneous?
-		// Usually FIFO is just strictly arrival order. Let's keep it strictly arrival order, unless their arrival is identical?
-		// Arrival order is guaranteed by queue insertion order. So no swap under pure FIFO.
-		return (0); 
+		return (0);
 	}
-	else // EDF
+	else
 	{
 		deadline1 = c1->last_compile_start + c1->sim->burnout_time;
 		deadline2 = c2->last_compile_start + c2->sim->burnout_time;
-
 		if (deadline2 < deadline1)
 			return (1);
 		else if (deadline2 == deadline1 && c2->id < c1->id)
 			return (1);
-		
 		return (0);
 	}
 }
@@ -69,9 +60,8 @@ void	enqueue_coder(t_dongle *dongle, t_coder *coder)
 	{
 		dongle->waiting[1] = coder;
 		dongle->queue_size = 2;
-		
-		// Priority sort: index 0 should be the one who gets the dongle next
-		if (should_swap(dongle->waiting[0], dongle->waiting[1], coder->sim->scheduler))
+		if (should_swap(dongle->waiting[0], dongle->waiting[1],
+				coder->sim->scheduler))
 		{
 			swap_coders(dongle);
 		}
