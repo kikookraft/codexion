@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/02 14:49:20 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/02 16:18:00 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,25 +97,25 @@ void		msleep(size_t time);
 t_dongle	*init_dongle(int nb_coders);
 t_scheduler	init_scheduler(char *argv[]);
 t_sim		*init_sim(char *argv[]);
+void		cleanup_sim(t_sim *sim);
 
 // ----- queue.c -----
 void		enqueue_coder(t_dongle *dongle, t_coder *coder);
 void		remove_coder(t_dongle *dongle, t_coder *coder);
+void		release_dongle(t_dongle *dongle);
 
 // ----- action.c -----
 void		*coder_routine(void *arg);
 void		compile(t_coder *coder, t_dongle *l_dongle, t_dongle *r_dongle);
 void		debug(t_coder *coder);
 void		refactor(t_coder *coder);
-int			is_simulation_running(t_sim *sim);
 
 // ----- routine.c -----
 int			start_simulation(t_sim *sim);
-void		take_dongle(t_coder *coder, t_dongle *dongle);
-void		release_dongle(t_dongle *dongle);
+int			take_dongle(t_coder *coder, t_dongle *dongle);
 void		dongle_take_wait(t_dongle *dongle, t_coder *coder);
-int			has_coder_burned_out(t_coder *coder);
 
 // ----- burnout.c -----
 void		*burnout_monitor(void *arg);
 void		end_simulation(t_sim *sim, int coder_id, int has_printed);
+int			has_coder_burned_out(t_coder *coder);

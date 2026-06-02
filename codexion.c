@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:20:59 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/01 17:21:14 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/02 15:25:50 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,7 @@ int	main(int ac, char **av)
 		return (1);
 	printf("\e[0;32mArguments are valid! Starting simulation...\e[0;37m\n");
 	start_simulation(sim);
+	cleanup_sim(sim);
 	free(sim->coders);
 	free(sim->dongles);
 	free(sim);

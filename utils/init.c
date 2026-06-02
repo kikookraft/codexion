@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 14:35:48 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/02 13:04:17 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/02 15:25:50 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,8 +23,8 @@ t_dongle	*init_dongle(int nb_coders)
 	i = -1;
 	while (++i < nb_coders)
 	{
-		dongle[i].dongle_cond = (pthread_cond_t)PTHREAD_COND_INITIALIZER;
-		dongle[i].dongle_lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
+		pthread_cond_init(&dongle[i].dongle_cond, NULL);
+		pthread_mutex_init(&dongle[i].dongle_lock, NULL);
 		dongle[i].id = i;
 		dongle[i].is_used = 0;
 		dongle[i].last_used = 0;
@@ -63,8 +63,8 @@ t_sim	*init_sim(char *argv[])
 	sim->is_running = 0;
 	sim->start_time = 0;
 	sim->dongles = init_dongle(sim->nb_coders);
-	sim->print_lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
-	sim->sim_lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
+	pthread_mutex_init(&sim->print_lock, NULL);
+	pthread_mutex_init(&sim->sim_lock, NULL);
 	sim->scheduler = init_scheduler(argv);
 	sim->burnout_thread = (pthread_t)0;
 	if (!sim->dongles)
@@ -73,4 +73,19 @@ t_sim	*init_sim(char *argv[])
 		return (NULL);
 	}
 	return (sim);
+}
+
+void	cleanup_sim(t_sim *sim)
+{
+	int	i;
+
+	i = -1;
+	while (++i < (int)sim->nb_coders)
+	{
+		pthread_mutex_destroy(&sim->coders[i].coder_lock);
+		pthread_mutex_destroy(&sim->dongles[i].dongle_lock);
+		pthread_cond_destroy(&sim->dongles[i].dongle_cond);
+	}
+	pthread_mutex_destroy(&sim->print_lock);
+	pthread_mutex_destroy(&sim->sim_lock);
 }
