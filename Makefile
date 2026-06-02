@@ -9,6 +9,7 @@ SRC = \
 	coders/parse.c \
 	coders/routine.c \
 	coders/action.c \
+	coders/burnout.c \
 	utils/time.c \
 	utils/init.c \
 	utils/queue.c

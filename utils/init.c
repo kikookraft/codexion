@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 14:35:48 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/02 11:57:41 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/02 13:04:17 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -66,6 +66,7 @@ t_sim	*init_sim(char *argv[])
 	sim->print_lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
 	sim->sim_lock = (pthread_mutex_t)PTHREAD_MUTEX_INITIALIZER;
 	sim->scheduler = init_scheduler(argv);
+	sim->burnout_thread = (pthread_t)0;
 	if (!sim->dongles)
 	{
 		free(sim);

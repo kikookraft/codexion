@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/02 12:01:02 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/02 14:49:20 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -57,6 +57,7 @@ typedef struct s_sim
 	t_dongle		*dongles;
 	pthread_mutex_t	print_lock;
 	pthread_mutex_t	sim_lock;
+	pthread_t		burnout_thread;
 	t_scheduler		scheduler;
 	unsigned int	nb_coders;
 	unsigned int	burnout_time;
@@ -77,6 +78,7 @@ typedef struct s_coder
 	pthread_t		thread;
 	int				times_compiled;
 	size_t			last_compile_start;
+	int				is_waiting;
 	t_sim			*sim;
 	pthread_mutex_t	coder_lock;
 }	t_coder;
@@ -105,9 +107,15 @@ void		*coder_routine(void *arg);
 void		compile(t_coder *coder, t_dongle *l_dongle, t_dongle *r_dongle);
 void		debug(t_coder *coder);
 void		refactor(t_coder *coder);
+int			is_simulation_running(t_sim *sim);
 
 // ----- routine.c -----
 int			start_simulation(t_sim *sim);
 void		take_dongle(t_coder *coder, t_dongle *dongle);
 void		release_dongle(t_dongle *dongle);
 void		dongle_take_wait(t_dongle *dongle, t_coder *coder);
+int			has_coder_burned_out(t_coder *coder);
+
+// ----- burnout.c -----
+void		*burnout_monitor(void *arg);
+void		end_simulation(t_sim *sim, int coder_id, int has_printed);

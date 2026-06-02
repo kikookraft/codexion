@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 16:32:49 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/01 17:16:41 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/02 14:29:16 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -20,7 +20,6 @@ void	*coder_routine(void *arg)
 	int			i;
 
 	coder = (t_coder *)arg;
-	i = -1;
 	if (coder->id % 2 == 0)
 	{
 		donglel = &coder->sim->dongles[coder->id];
@@ -31,6 +30,7 @@ void	*coder_routine(void *arg)
 		donglel = &coder->sim->dongles[(coder->id + 1) % coder->sim->nb_coders];
 		dongler = &coder->sim->dongles[coder->id];
 	}
+	i = -1;
 	while ((unsigned int)++i < coder->sim->target_compiles)
 	{
 		compile(coder, donglel, dongler);
@@ -44,6 +44,8 @@ void	compile(t_coder *coder, t_dongle *left_dongle, t_dongle *right_dongle)
 {
 	take_dongle(coder, left_dongle);
 	take_dongle(coder, right_dongle);
+	if (!coder->sim->is_running)
+		return ;
 	pthread_mutex_lock(&coder->sim->print_lock);
 	printf("%zu %d is compiling\n",
 		get_time() - coder->sim->start_time, coder->id + 1);
@@ -51,8 +53,6 @@ void	compile(t_coder *coder, t_dongle *left_dongle, t_dongle *right_dongle)
 	pthread_mutex_lock(&coder->coder_lock);
 	coder->last_compile_start = get_time();
 	pthread_mutex_unlock(&coder->coder_lock);
-	if (!coder->sim->is_running)
-		return ;
 	msleep(coder->sim->compile_time);
 	if (!coder->sim->is_running)
 		return ;
@@ -87,4 +87,14 @@ void	refactor(t_coder *coder)
 	msleep(coder->sim->refactor_time);
 	if (!coder->sim->is_running)
 		return ;
+}
+
+int	is_simulation_running(t_sim *sim)
+{
+	int	running;
+
+	pthread_mutex_lock(&sim->sim_lock);
+	running = sim->is_running;
+	pthread_mutex_unlock(&sim->sim_lock);
+	return (running);
 }
