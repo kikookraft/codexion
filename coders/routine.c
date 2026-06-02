@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 00:00:00 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/02 16:18:03 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/02 17:07:14 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,12 +22,27 @@ static int	take_dongle_finish(t_coder *coder, t_dongle *dongle, int ok)
 		return (0);
 	}
 	dongle->is_used = 1;
+	dongle->last_user = coder->id;
 	pthread_mutex_lock(&coder->sim->print_lock);
 	printf("%zu %d has taken a dongle\n",
 		get_time() - coder->sim->start_time, coder->id + 1);
 	pthread_mutex_unlock(&coder->sim->print_lock);
 	pthread_mutex_unlock(&dongle->dongle_lock);
 	return (1);
+}
+
+static int	should_wait(t_coder *c, t_dongle *d)
+{
+	if (d->is_used || d->waiting[0] != c)
+		return (1);
+	if (d->last_user == c->id && d->queue_size == 2)
+	{
+		d->waiting[0] = d->waiting[1];
+		d->waiting[1] = c;
+		d->last_user = -1;
+		return (1);
+	}
+	return (0);
 }
 
 int	take_dongle(t_coder *coder, t_dongle *dongle)
@@ -39,7 +54,7 @@ int	take_dongle(t_coder *coder, t_dongle *dongle)
 	pthread_mutex_unlock(&coder->coder_lock);
 	while (coder->sim->is_running)
 	{
-		if (dongle->is_used || dongle->waiting[0] != coder)
+		if (should_wait(coder, dongle))
 			pthread_cond_wait(&dongle->dongle_cond, &dongle->dongle_lock);
 		else if (dongle->last_used + coder->sim->dongle_cooldown > get_time())
 			dongle_take_wait(dongle, coder);
@@ -72,24 +87,6 @@ void	dongle_take_wait(t_dongle *dongle, t_coder *coder)
 		ts.tv_nsec -= 1000000000;
 	}
 	pthread_cond_timedwait(&dongle->dongle_cond, &dongle->dongle_lock, &ts);
-}
-
-static void	init_coders(t_sim *sim)
-{
-	int	i;
-
-	i = -1;
-	while ((unsigned int)++i < sim->nb_coders)
-	{
-		sim->coders[i].id = (unsigned int)i;
-		sim->coders[i].times_compiled = 0;
-		sim->coders[i].last_compile_start = sim->start_time;
-		sim->coders[i].sim = sim;
-		sim->coders[i].is_waiting = 0;
-		pthread_mutex_init(&sim->coders[i].coder_lock, NULL);
-		pthread_create(&sim->coders[i].thread,
-			NULL, coder_routine, &sim->coders[i]);
-	}
 }
 
 int	start_simulation(t_sim *sim)

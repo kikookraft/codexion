@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 12:00:00 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/02 16:18:00 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/02 17:07:14 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -97,6 +97,6 @@ void	release_dongle(t_dongle *dongle)
 	pthread_mutex_lock(&dongle->dongle_lock);
 	dongle->is_used = 0;
 	dongle->last_used = get_time();
-	pthread_cond_broadcast(&dongle->dongle_cond);
 	pthread_mutex_unlock(&dongle->dongle_lock);
+	pthread_cond_broadcast(&dongle->dongle_cond);
 }

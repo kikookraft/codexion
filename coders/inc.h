@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/02 16:18:00 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/02 17:07:14 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -44,6 +44,7 @@ typedef struct s_dongle
 {
 	int				id;
 	int				is_used;
+	int				last_user;
 	pthread_mutex_t	dongle_lock;
 	pthread_cond_t	dongle_cond;
 	size_t			last_used;
@@ -98,6 +99,7 @@ t_dongle	*init_dongle(int nb_coders);
 t_scheduler	init_scheduler(char *argv[]);
 t_sim		*init_sim(char *argv[]);
 void		cleanup_sim(t_sim *sim);
+void		init_coders(t_sim *sim);
 
 // ----- queue.c -----
 void		enqueue_coder(t_dongle *dongle, t_coder *coder);
