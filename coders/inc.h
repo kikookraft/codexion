@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/02 17:07:14 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/04 14:26:28 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -108,6 +108,7 @@ void		release_dongle(t_dongle *dongle);
 
 // ----- action.c -----
 void		*coder_routine(void *arg);
+void		routine_loop(t_coder *coder, t_dongle *donglel, t_dongle *dongler);
 void		compile(t_coder *coder, t_dongle *l_dongle, t_dongle *r_dongle);
 void		debug(t_coder *coder);
 void		refactor(t_coder *coder);

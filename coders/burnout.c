@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/02 12:32:36 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/04 12:16:13 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/04 14:17:00 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,6 +16,8 @@ static int	check_burnouts(t_sim *sim, size_t current_time)
 {
 	int	i;
 
+	if (sim->nb_coders <= 1)
+		return (0);
 	i = -1;
 	while (++i < (int)sim->nb_coders)
 	{
@@ -47,7 +49,7 @@ void	*burnout_monitor(void *arg)
 			end_simulation(sim, burnout_coder, 0);
 			break ;
 		}
-		msleep(1);
+		usleep(100);
 	}
 	return (NULL);
 }
@@ -75,7 +77,7 @@ void	end_simulation(t_sim *sim, int coder_id, int has_printed)
 	current_time = get_time();
 	pthread_mutex_lock(&sim->print_lock);
 	if (!has_printed)
-		printf("\e[0;31m%zu %d has burned out\e[0;37m\n",
+		printf("\e[0;31m%-5zu %-5d has burned out\e[0;37m\n",
 			current_time - sim->start_time, sim->coders[coder_id].id + 1);
 	pthread_mutex_unlock(&sim->print_lock);
 	broadcast_dongles(sim);

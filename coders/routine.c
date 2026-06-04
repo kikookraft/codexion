@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 00:00:00 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/04 12:17:01 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/04 14:14:20 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -24,7 +24,7 @@ static int	take_dongle_finish(t_coder *coder, t_dongle *dongle, int ok)
 	dongle->is_used = 1;
 	dongle->last_user = coder->id;
 	pthread_mutex_lock(&coder->sim->print_lock);
-	printf("%zu %d has taken a dongle\n",
+	printf("%-5zu %-5d has taken a dongle\n",
 		get_time() - coder->sim->start_time, coder->id + 1);
 	pthread_mutex_unlock(&coder->sim->print_lock);
 	pthread_mutex_unlock(&dongle->dongle_lock);
@@ -47,6 +47,8 @@ static int	should_wait(t_coder *c, t_dongle *d)
 
 int	take_dongle(t_coder *coder, t_dongle *dongle)
 {
+	int	running;
+
 	pthread_mutex_lock(&dongle->dongle_lock);
 	enqueue_coder(dongle, coder);
 	pthread_mutex_lock(&coder->coder_lock);
@@ -61,10 +63,11 @@ int	take_dongle(t_coder *coder, t_dongle *dongle)
 		else
 			break ;
 	}
+	running = coder->sim->is_running;
 	pthread_mutex_lock(&coder->coder_lock);
 	coder->is_waiting = 0;
 	pthread_mutex_unlock(&coder->coder_lock);
-	return (take_dongle_finish(coder, dongle, coder->sim->is_running));
+	return (take_dongle_finish(coder, dongle, running));
 }
 
 void	dongle_take_wait(t_dongle *dongle, t_coder *coder)

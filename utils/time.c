@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 16:57:17 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/01 17:19:47 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/04 13:54:41 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,5 +26,5 @@ void	msleep(size_t time)
 
 	start = get_time();
 	while ((get_time() - start) < time)
-		usleep(200);
+		continue ;
 }
