@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 16:57:17 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/04 13:54:41 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/04 15:04:40 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -26,5 +26,15 @@ void	msleep(size_t time)
 
 	start = get_time();
 	while ((get_time() - start) < time)
-		continue ;
+		usleep(100);
+}
+
+int	is_simulation_running(t_sim *sim)
+{
+	int	running;
+
+	pthread_mutex_lock(&sim->sim_lock);
+	running = sim->is_running;
+	pthread_mutex_unlock(&sim->sim_lock);
+	return (running);
 }

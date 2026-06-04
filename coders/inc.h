@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/04 14:26:28 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/04 15:08:17 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -67,7 +67,7 @@ typedef struct s_sim
 	unsigned int	refactor_time;
 	unsigned int	target_compiles;
 	unsigned int	dongle_cooldown;
-	int				is_running;
+	volatile int	is_running;
 	size_t			start_time;
 	t_coder			*coders;
 }	t_sim;
@@ -93,6 +93,7 @@ int			show_help(int helpId, int argc, char **argv);
 // ----- time.c -----
 size_t		get_time(void);
 void		msleep(size_t time);
+int			is_simulation_running(t_sim *sim);
 
 // ----- init.c -----
 t_dongle	*init_dongle(int nb_coders);
