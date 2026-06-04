@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/02 12:32:36 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/02 16:18:00 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/04 12:16:13 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -75,7 +75,7 @@ void	end_simulation(t_sim *sim, int coder_id, int has_printed)
 	current_time = get_time();
 	pthread_mutex_lock(&sim->print_lock);
 	if (!has_printed)
-		printf("%zu %d has burned out\n",
+		printf("\e[0;31m%zu %d has burned out\e[0;37m\n",
 			current_time - sim->start_time, sim->coders[coder_id].id + 1);
 	pthread_mutex_unlock(&sim->print_lock);
 	broadcast_dongles(sim);
