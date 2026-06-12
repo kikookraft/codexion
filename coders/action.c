@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 16:32:49 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/04 15:08:13 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/12 15:14:09 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -17,9 +17,10 @@ void	*coder_routine(void *arg)
 	t_coder		*coder;
 	t_dongle	*donglel;
 	t_dongle	*dongler;
-	int			i;
 
 	coder = (t_coder *)arg;
+	if (coder->sim->nb_coders % 2 == 0 && coder->id % 2 != 0)
+		usleep(500);
 	if (coder->id % 2 == 0)
 	{
 		donglel = &coder->sim->dongles[coder->id];
@@ -30,7 +31,6 @@ void	*coder_routine(void *arg)
 		donglel = &coder->sim->dongles[(coder->id + 1) % coder->sim->nb_coders];
 		dongler = &coder->sim->dongles[coder->id];
 	}
-	i = -1;
 	routine_loop(coder, donglel, dongler);
 	return (NULL);
 }
@@ -67,12 +67,12 @@ void	compile(t_coder *coder, t_dongle *l, t_dongle *r)
 		release_dongle(l);
 		return ;
 	}
-	printf("%-5zu %-5d is compiling\n",
-		get_time() - coder->sim->start_time, coder->id + 1);
-	pthread_mutex_unlock(&coder->sim->print_lock);
 	pthread_mutex_lock(&coder->coder_lock);
 	coder->last_compile_start = get_time();
 	pthread_mutex_unlock(&coder->coder_lock);
+	printf("%-5zu %-5d is compiling\n",
+		get_time() - coder->sim->start_time, coder->id + 1);
+	pthread_mutex_unlock(&coder->sim->print_lock);
 	msleep(coder->sim->compile_time);
 	release_dongle(r);
 	release_dongle(l);

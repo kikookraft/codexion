@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 00:00:00 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/04 15:06:40 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/12 14:59:03 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,7 +123,8 @@ int	start_simulation(t_sim *sim)
 			"\e[0;32m", sim->target_compiles, "\e[0;37m");
 		pthread_mutex_unlock(&sim->print_lock);
 	}
-	pthread_mutex_unlock(&sim->sim_lock);
+	else
+		pthread_mutex_unlock(&sim->sim_lock);
 	pthread_join(sim->burnout_thread, NULL);
 	return (0);
 }

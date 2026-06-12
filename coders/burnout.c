@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/02 12:32:36 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/04 15:00:29 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/12 14:56:50 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -16,15 +16,13 @@ static int	check_burnouts(t_sim *sim, size_t current_time)
 {
 	int	i;
 
-	if (sim->nb_coders <= 1)
-		return (0);
+	(void)current_time;
 	i = -1;
 	while (++i < (int)sim->nb_coders)
 	{
 		if (has_coder_burned_out(&sim->coders[i]))
 			return (i);
 	}
-	(void)current_time;
 	return (-1);
 }
 
@@ -49,7 +47,7 @@ void	*burnout_monitor(void *arg)
 			end_simulation(sim, burnout_coder, 0);
 			break ;
 		}
-		usleep(100);
+		usleep(1000);
 	}
 	return (NULL);
 }
@@ -65,7 +63,6 @@ static void	stop_and_broadcast(t_sim *sim)
 	while (++i < (int)sim->nb_coders)
 	{
 		pthread_mutex_lock(&sim->dongles[i].dongle_lock);
-		sim->is_running = 0;
 		pthread_cond_broadcast(&sim->dongles[i].dongle_cond);
 		pthread_mutex_unlock(&sim->dongles[i].dongle_lock);
 	}
@@ -90,8 +87,7 @@ void	end_simulation(t_sim *sim, int coder_id, int has_printed)
 int	has_coder_burned_out(t_coder *coder)
 {
 	pthread_mutex_lock(&coder->coder_lock);
-	if (!coder->is_waiting
-		&& get_time() - coder->last_compile_start >= coder->sim->burnout_time)
+	if (get_time() - coder->last_compile_start >= coder->sim->burnout_time)
 	{
 		pthread_mutex_unlock(&coder->coder_lock);
 		return (1);

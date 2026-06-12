@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/07 14:54:04 by tobesson          #+#    #+#             */
-/*   Updated: 2026/05/15 15:09:23 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/12 14:56:50 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -18,18 +18,37 @@ and check if scheduler is fifo or edf
 on fail show a message explaining what is wrong
 return 1 when arguments are invalid (else 0)
 */
-int	check_args(int argc, char **argv)
+static int	is_valid_number(const char *str)
 {
 	int	i;
-	int	val;
+
+	i = 0;
+	if (str[i] == '\0')
+		return (0);
+	while (str[i])
+	{
+		if (str[i] < '0' || str[i] > '9')
+			return (0);
+		i++;
+	}
+	return (1);
+}
+
+int	check_args(int argc, char **argv)
+{
+	int		i;
+	long	val;
 
 	if (argc != NB_ARGS)
 		return (show_help(0, argc, argv));
 	i = 0;
 	while (++i < argc - 1)
 	{
-		val = atoi(argv[i]);
-		if (val < 0 || (val <= 0 && i == 1))
+		if (!is_valid_number(argv[i]))
+			return (show_help(i, argc, argv));
+		val = strtol(argv[i], NULL, 10);
+		if (val < 0 || val > 2147483647
+			|| (val <= 0 && i == 1))
 			return (show_help(i, argc, argv));
 	}
 	if (strcmp(argv[i], "fifo") && strcmp(argv[i], "edf"))
