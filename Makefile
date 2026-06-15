@@ -12,7 +12,8 @@ SRC = \
 	coders/burnout.c \
 	utils/time.c \
 	utils/init.c \
-	utils/queue.c
+	utils/queue.c \
+	utils/log.c
 
 OBJ = $(SRC:.c=.o)
 

@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/04 15:08:17 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/15 12:16:53 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,3 +123,6 @@ void		dongle_take_wait(t_dongle *dongle, t_coder *coder);
 void		*burnout_monitor(void *arg);
 void		end_simulation(t_sim *sim, int coder_id, int has_printed);
 int			has_coder_burned_out(t_coder *coder);
+
+// ---- print.c -----
+void		log_term(char *message, t_sim *sim);
