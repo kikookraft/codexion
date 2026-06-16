@@ -13,7 +13,7 @@ SRC = \
 	utils/time.c \
 	utils/init.c \
 	utils/queue.c \
-	utils/log.c
+	utils/print.c
 
 OBJ = $(SRC:.c=.o)
 
