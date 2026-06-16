@@ -6,58 +6,15 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 16:32:49 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/12 15:14:09 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/16 16:30:31 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc.h"
 
-void	*coder_routine(void *arg)
+static void	compile_execute(t_coder *coder, t_dongle *l, t_dongle *r)
 {
-	t_coder		*coder;
-	t_dongle	*donglel;
-	t_dongle	*dongler;
-
-	coder = (t_coder *)arg;
-	if (coder->sim->nb_coders % 2 == 0 && coder->id % 2 != 0)
-		usleep(500);
-	if (coder->id % 2 == 0)
-	{
-		donglel = &coder->sim->dongles[coder->id];
-		dongler = &coder->sim->dongles[(coder->id + 1) % coder->sim->nb_coders];
-	}
-	else
-	{
-		donglel = &coder->sim->dongles[(coder->id + 1) % coder->sim->nb_coders];
-		dongler = &coder->sim->dongles[coder->id];
-	}
-	routine_loop(coder, donglel, dongler);
-	return (NULL);
-}
-
-void	routine_loop(t_coder *coder, t_dongle *donglel, t_dongle *dongler)
-{
-	int	i;
-
-	i = -1;
-	while ((unsigned int)++i < coder->sim->target_compiles
-		&& is_simulation_running(coder->sim))
-	{
-		compile(coder, donglel, dongler);
-		if (!is_simulation_running(coder->sim))
-			break ;
-		debug(coder);
-		if (!is_simulation_running(coder->sim))
-			break ;
-		refactor(coder);
-	}
-}
-
-void	compile(t_coder *coder, t_dongle *l, t_dongle *r)
-{
-	if (!take_dongle(coder, l))
-		return ;
-	if (!take_dongle(coder, r) && (release_dongle(l), 1))
+	if (!is_simulation_running(coder->sim))
 		return ;
 	pthread_mutex_lock(&coder->sim->print_lock);
 	if (!is_simulation_running(coder->sim))
@@ -79,6 +36,35 @@ void	compile(t_coder *coder, t_dongle *l, t_dongle *r)
 	pthread_mutex_lock(&coder->coder_lock);
 	coder->times_compiled++;
 	pthread_mutex_unlock(&coder->coder_lock);
+}
+
+void	compile(t_coder *coder, t_dongle *l, t_dongle *r)
+{
+	int	backoff;
+
+	if (coder->sim->nb_coders % 2 == 0)
+	{
+		if (!take_dongle(coder, l))
+			return ;
+		if (!take_dongle(coder, r) && (release_dongle(l), 1))
+			return ;
+	}
+	else
+	{
+		backoff = 1000;
+		while (is_simulation_running(coder->sim))
+		{
+			if (!take_dongle(coder, l))
+				return ;
+			if (take_dongle_timeout(coder, r, 5000))
+				break ;
+			release_dongle(l);
+			usleep(backoff);
+			if (backoff < 10000)
+				backoff *= 2;
+		}
+	}
+	compile_execute(coder, l, r);
 }
 
 void	debug(t_coder *coder)

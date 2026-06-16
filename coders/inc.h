@@ -6,12 +6,13 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/15 12:22:14 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/16 15:42:58 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #pragma once
 
+#include <errno.h>
 #include <pthread.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -94,6 +95,7 @@ int			show_help(int helpId, int argc, char **argv);
 size_t		get_time(void);
 void		msleep(size_t time);
 int			is_simulation_running(t_sim *sim);
+void		dongle_take_wait(t_dongle *dongle, t_coder *coder);
 
 // ----- init.c -----
 t_dongle	*init_dongle(int nb_coders);
@@ -117,7 +119,8 @@ void		refactor(t_coder *coder);
 // ----- routine.c -----
 int			start_simulation(t_sim *sim);
 int			take_dongle(t_coder *coder, t_dongle *dongle);
-void		dongle_take_wait(t_dongle *dongle, t_coder *coder);
+int			take_dongle_timeout(t_coder *coder, t_dongle *dongle,
+				size_t timeout_ms);
 
 // ----- burnout.c -----
 void		*burnout_monitor(void *arg);

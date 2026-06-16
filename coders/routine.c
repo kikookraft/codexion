@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 00:00:00 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/15 12:21:40 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/16 15:42:58 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -77,43 +77,42 @@ int	take_dongle(t_coder *coder, t_dongle *dongle)
 	return (take_dongle_finish(coder, dongle, running));
 }
 
-void	dongle_take_wait(t_dongle *dongle, t_coder *coder)
+static int	timedwait_or_timeout(t_dongle *dongle, size_t deadline)
 {
-	size_t			now;
-	size_t			cooldown_end;
-	size_t			remaining;
 	struct timespec	ts;
+	int				ret;
 
-	now = get_time();
-	cooldown_end = dongle->last_used + coder->sim->dongle_cooldown;
-	if (cooldown_end <= now)
-		return ;
-	remaining = cooldown_end - now;
-	ts.tv_sec = (now / 1000) + (remaining / 1000);
-	ts.tv_nsec = ((now % 1000) * 1000000) + ((remaining % 1000) * 1000000);
-	if (ts.tv_nsec >= 1000000000)
-	{
-		ts.tv_sec += 1;
-		ts.tv_nsec -= 1000000000;
-	}
-	pthread_cond_timedwait(&dongle->dongle_cond, &dongle->dongle_lock, &ts);
+	ts.tv_sec = deadline / 1000;
+	ts.tv_nsec = (deadline % 1000) * 1000000;
+	ret = pthread_cond_timedwait(&dongle->dongle_cond,
+			&dongle->dongle_lock, &ts);
+	return (ret == ETIMEDOUT);
 }
 
-int	start_simulation(t_sim *sim)
+int	take_dongle_timeout(t_coder *coder, t_dongle *dongle, size_t timeout_ms)
 {
-	int	i;
+	size_t	deadline;
 
-	sim->start_time = get_time();
-	sim->is_running = 1;
-	sim->coders = malloc(sizeof(t_coder) * sim->nb_coders);
-	if (!sim->coders)
-		return (1);
-	init_coders(sim);
-	pthread_create(&sim->burnout_thread, NULL, burnout_monitor, sim);
-	i = -1;
-	while ((unsigned int)++i < sim->nb_coders)
-		pthread_join(sim->coders[i].thread, NULL);
-	sim_ended(sim);
-	pthread_join(sim->burnout_thread, NULL);
-	return (0);
+	pthread_mutex_lock(&dongle->dongle_lock);
+	enqueue_coder(dongle, coder);
+	deadline = get_time() + timeout_ms;
+	while (is_simulation_running(coder->sim))
+	{
+		if (should_wait(coder, dongle))
+		{
+			if (timedwait_or_timeout(dongle, deadline))
+				return (take_dongle_finish(coder, dongle, 0));
+		}
+		else if (dongle->last_used
+			+ coder->sim->dongle_cooldown > get_time())
+		{
+			if (dongle->last_used
+				+ coder->sim->dongle_cooldown > deadline)
+				return (take_dongle_finish(coder, dongle, 0));
+			dongle_take_wait(dongle, coder);
+		}
+		else
+			break ;
+	}
+	return (take_dongle_finish(coder, dongle, 1));
 }

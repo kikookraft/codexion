@@ -23,7 +23,7 @@ $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) $(INCLUDES) -o $(NAME)
 
 %.o: %.c coders/inc.h
-	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) -g -c $< -o $@
 
 clean:
 	rm -f $(OBJ)

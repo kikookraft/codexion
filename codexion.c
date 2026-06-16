@@ -6,11 +6,75 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:20:59 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/02 15:25:50 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/16 15:42:58 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "coders/inc.h"
+
+void	*coder_routine(void *arg)
+{
+	t_coder		*coder;
+	t_dongle	*donglel;
+	t_dongle	*dongler;
+
+	coder = (t_coder *)arg;
+	if (coder->sim->nb_coders % 2 == 0 && coder->id % 2 != 0)
+		usleep(500);
+	else if (coder->sim->nb_coders % 2 != 0 && coder->id % 2 == 0)
+		usleep(500);
+	if (coder->id % 2 == 0)
+	{
+		donglel = &coder->sim->dongles[coder->id];
+		dongler = &coder->sim->dongles[(coder->id + 1)
+			% coder->sim->nb_coders];
+	}
+	else
+	{
+		donglel = &coder->sim->dongles[(coder->id + 1)
+			% coder->sim->nb_coders];
+		dongler = &coder->sim->dongles[coder->id];
+	}
+	routine_loop(coder, donglel, dongler);
+	return (NULL);
+}
+
+void	routine_loop(t_coder *coder, t_dongle *donglel, t_dongle *dongler)
+{
+	int	i;
+
+	i = -1;
+	while ((unsigned int)++i < coder->sim->target_compiles
+		&& is_simulation_running(coder->sim))
+	{
+		compile(coder, donglel, dongler);
+		if (!is_simulation_running(coder->sim))
+			break ;
+		debug(coder);
+		if (!is_simulation_running(coder->sim))
+			break ;
+		refactor(coder);
+	}
+}
+
+int	start_simulation(t_sim *sim)
+{
+	int	i;
+
+	sim->start_time = get_time();
+	sim->is_running = 1;
+	sim->coders = malloc(sizeof(t_coder) * sim->nb_coders);
+	if (!sim->coders)
+		return (1);
+	init_coders(sim);
+	pthread_create(&sim->burnout_thread, NULL, burnout_monitor, sim);
+	i = -1;
+	while ((unsigned int)++i < sim->nb_coders)
+		pthread_join(sim->coders[i].thread, NULL);
+	sim_ended(sim);
+	pthread_join(sim->burnout_thread, NULL);
+	return (0);
+}
 
 int	main(int ac, char **av)
 {
