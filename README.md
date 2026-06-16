@@ -35,16 +35,19 @@ Example:
 ## How it works
 
 ### Startup
-1. Arguments are parsed and validated (all must be positive, scheduler must be `fifo` or `edf`).
+1. Arguments are parsed and validated (positive integers, overflow-checked via `strtol`, scheduler must be `fifo` or `edf`).
 2. The simulation structure is allocated, dongles are initialized with their own mutex and condition variable.
-3. Coder threads are created, each with an odd/even dongle ordering to prevent deadlock.
-4. The burnout monitor thread is started.
+3. Coder threads are created with an adaptive startup stagger: for even coder counts, odd-indexed coders wait 500 µs (even-first pipeline); for odd coder counts, even-indexed coders wait 500 µs (odd-first pipeline). This establishes a balanced compile order and prevents pipeline contention.
+4. Each coder uses an odd/even dongle ordering to prevent deadlock.
+5. The burnout monitor thread is started.
 
 ### Coder lifecycle (each iteration)
-1. **Acquire left dongle** — locks the dongle mutex, enqueues the coder in a priority queue sorted by EDF deadline or FIFO arrival. If the dongle is busy or the coder is not first in queue, the thread waits on the condition variable. If the coder just used this dongle and another coder is waiting, it yields its position.
-2. **Acquire right dongle** — same process. If it fails, the left dongle is released.
-3. **Compile** — both dongles are held for `compile` ms. `last_compile_start` is updated, resetting the burnout timer.
-4. **Release dongles** — both dongles are freed with a timestamp for cooldown tracking, then a broadcast wakes waiting coders.
+1. **Acquire left dongle** — blocking `take_dongle()`. Locks the dongle mutex, enqueues the coder in a 2-slot priority queue sorted by EDF deadline or FIFO arrival. Waits on the condition variable until the dongle is free, cooldown has expired, and the coder is first in queue. If the coder just used this dongle and another coder is waiting, the fairness bump yields its position to prevent monopolization.
+2. **Acquire right dongle** — strategy depends on coder count:
+   - **Even counts**: blocking `take_dongle()` (same as left). Hold-and-wait is safe because the pipeline divides evenly into two alternating phases.
+   - **Odd counts**: `take_dongle_timeout()` with a 5 ms deadline. If unavailable within 5 ms, the left dongle is released and the coder retries with exponential backoff (1→10 ms). This prevents the hostage cascade that occurs when one extra even coder blocks an odd coder's dongle.
+3. **Compile** — `last_compile_start` is updated BEFORE printing, preventing a race with the burnout monitor. Both dongles are held for `compile` ms.
+4. **Release dongles** — both dongles are freed with a timestamp for cooldown tracking. Broadcast is inside the mutex lock (helgrind-clean).
 5. **Debug** — wait for `debug` ms.
 6. **Refactor** — wait for `refactor` ms.
 7. Loop until `compiles` iterations are done or the simulation stops.
@@ -55,10 +58,10 @@ Each dongle holds a 2-slot waitlist sorted by the active scheduler:
 - **EDF**: the coder with the earliest burnout deadline (`last_compile_start + burnout`) is served first. Equal deadlines break by lower coder ID.
 
 ### Burnout detection
-A dedicated monitor thread loops every 100 µs, checking every coder. A coder burns out if it is not currently waiting for a dongle and the time since its last compile start exceeds the burnout limit. On detection, the simulation is stopped: `is_running` is set to 0 under `sim_lock`, the burnout message is printed under `print_lock`, and all dongle condition variables are broadcast so waiting threads can exit.
+A dedicated monitor thread loops every 1 ms, checking every coder including those waiting for dongles. Per the subject, any coder that has not started compiling within `burnout` ms burns out. A coder burns out when `get_time() - last_compile_start >= burnout`. On detection, `end_simulation` sets `is_running = 0` under `sim_lock`, prints the burnout message under `print_lock`, and broadcasts all dongle condition variables so waiting threads exit cleanly.
 
 ### Shutdown
-After all coder threads have joined, the main thread checks whether `is_running` is still true — meaning everyone finished their compiles before anyone burned out — and prints a success message. All mutexes and condition variables are destroyed, and memory is freed.
+After all coder threads have joined, `sim_ended()` checks `is_running` under `sim_lock`. If still true (all coders finished without burnout), it prints a success message. The burnout thread is then joined. All mutexes, condition variables are destroyed, and memory is freed.
 
 ## Concurrency handling
 
@@ -88,7 +91,7 @@ The `is_running` flag is declared `volatile` and is read through `is_simulation_
 - `pthread_cond_timedwait` to enforce the dongle cooldown without busy-waiting.
 - `pthread_cond_broadcast` in `release_dongle` and `end_simulation` to wake all waiters.
 
-Coders communicate with the monitor implicitly through shared state: `is_waiting` tells the monitor to exclude a coder from burnout checks while it is queued for a dongle. The monitor communicates shutdown to coders via `is_running` and dongle broadcasts.
+The monitor communicates shutdown to coders via `is_running` (checked under `sim_lock` by `is_simulation_running()`) and broadcasts on all dongle condition variables. Every state-change function re-checks `is_running` before acting, ensuring clean shutdown.
 
 ## AI usage
 
