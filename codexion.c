@@ -6,12 +6,18 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:20:59 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/16 15:42:58 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/17 12:28:13 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "coders/inc.h"
 
+/*
+ * Thread entry point for each coder. Applies adaptive startup stagger
+ * (even-first for even coder counts, odd-first for odd counts),
+ * resolves the coder's left/right dongle pair using alternating ordering
+ * to prevent deadlock, then enters the compile-debug-refactor loop.
+ */
 void	*coder_routine(void *arg)
 {
 	t_coder		*coder;
@@ -39,6 +45,10 @@ void	*coder_routine(void *arg)
 	return (NULL);
 }
 
+/*
+ * Main coder loop: repeats compile -> debug -> refactor until the
+ * required number of compiles is reached or the simulation stops.
+ */
 void	routine_loop(t_coder *coder, t_dongle *donglel, t_dongle *dongler)
 {
 	int	i;
@@ -57,6 +67,11 @@ void	routine_loop(t_coder *coder, t_dongle *donglel, t_dongle *dongler)
 	}
 }
 
+/*
+ * Initializes the simulation: records start time, allocates coder
+ * array, spawns all coder threads plus the burnout monitor, waits
+ * for all threads to finish, then prints the outcome.
+ */
 int	start_simulation(t_sim *sim)
 {
 	int	i;
@@ -76,6 +91,10 @@ int	start_simulation(t_sim *sim)
 	return (0);
 }
 
+/*
+ * Entry point: validates arguments, allocates the simulation,
+ * runs it, cleans up and frees all resources.
+ */
 int	main(int ac, char **av)
 {
 	t_sim	*sim;

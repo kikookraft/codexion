@@ -6,12 +6,16 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 14:35:48 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/02 17:07:14 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/17 12:28:13 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc.h"
 
+/*
+ * Allocates and initializes an array of nb_coders dongles.
+ * Each dongle gets its own mutex and condition variable.
+ */
 t_dongle	*init_dongle(int nb_coders)
 {
 	t_dongle	*dongle;
@@ -36,6 +40,9 @@ t_dongle	*init_dongle(int nb_coders)
 	return (dongle);
 }
 
+/*
+ * Parses the scheduler argument: returns FIFO if "fifo", else EDF.
+ */
 t_scheduler	init_scheduler(char *argv[])
 {
 	t_scheduler	scheduler;
@@ -47,6 +54,10 @@ t_scheduler	init_scheduler(char *argv[])
 	return (scheduler);
 }
 
+/*
+ * Allocates the simulation structure, parses all numeric arguments,
+ * initializes dongles, mutexes, and the scheduler.
+ */
 t_sim	*init_sim(char *argv[])
 {
 	t_sim	*sim;
@@ -76,6 +87,10 @@ t_sim	*init_sim(char *argv[])
 	return (sim);
 }
 
+/*
+ * Destroys all coder mutexes, dongle mutexes, dongle condition
+ * variables, and the simulation-level mutexes.
+ */
 void	cleanup_sim(t_sim *sim)
 {
 	int	i;
@@ -91,6 +106,10 @@ void	cleanup_sim(t_sim *sim)
 	pthread_mutex_destroy(&sim->sim_lock);
 }
 
+/*
+ * Initializes coder metadata (id, counters, timestamps) and
+ * creates a thread for each coder running coder_routine.
+ */
 void	init_coders(t_sim *sim)
 {
 	int	i;

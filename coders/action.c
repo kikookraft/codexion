@@ -6,12 +6,18 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 16:32:49 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/16 16:30:31 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/17 12:28:13 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc.h"
 
+/*
+ * Executes the compile phase once both dongles are held:
+ * sets last_compile_start BEFORE printing (avoids race with
+ * burnout monitor), prints "is compiling", sleeps compile_time ms,
+ * releases both dongles, increments times_compiled.
+ */
 static void	compile_execute(t_coder *coder, t_dongle *l, t_dongle *r)
 {
 	if (!is_simulation_running(coder->sim))
@@ -38,6 +44,12 @@ static void	compile_execute(t_coder *coder, t_dongle *l, t_dongle *r)
 	pthread_mutex_unlock(&coder->coder_lock);
 }
 
+/*
+ * Acquires both dongles then delegates to compile_execute.
+ * Even coder counts: blocking take_dongle on both (hold-and-wait).
+ * Odd coder counts: take_dongle_timeout on right dongle with 5 ms
+ * deadline and exponential backoff (1-10 ms) to prevent hostage.
+ */
 void	compile(t_coder *coder, t_dongle *l, t_dongle *r)
 {
 	int	backoff;
@@ -67,6 +79,10 @@ void	compile(t_coder *coder, t_dongle *l, t_dongle *r)
 	compile_execute(coder, l, r);
 }
 
+/*
+ * Debug phase: prints "is debugging" under print_lock,
+ * sleeps for debug_time ms.
+ */
 void	debug(t_coder *coder)
 {
 	pthread_mutex_lock(&coder->sim->print_lock);
@@ -83,6 +99,10 @@ void	debug(t_coder *coder)
 	msleep(coder->sim->debug_time);
 }
 
+/*
+ * Refactor phase: prints "is refactoring" under print_lock,
+ * sleeps for refactor_time ms.
+ */
 void	refactor(t_coder *coder)
 {
 	pthread_mutex_lock(&coder->sim->print_lock);

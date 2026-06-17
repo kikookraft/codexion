@@ -6,13 +6,15 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 12:00:00 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/16 15:17:52 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/17 12:28:19 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc.h"
 
-/* Swap two coders in the queue */
+/*
+ * Swaps waiting[0] and waiting[1] after EDF reordering.
+ */
 static void	swap_coders(t_dongle *dongle)
 {
 	t_coder	*tmp;
@@ -48,7 +50,11 @@ static int	should_swap(t_coder *c1, t_coder *c2, t_scheduler scheduler)
 	}
 }
 
-/* Enqueue a coder based on arbitration rules */
+/*
+ * Adds a coder to the dongle's 2-slot waitlist. If a second coder
+ * arrives, calls should_swap to reorder by scheduler policy
+ * (FIFO preserves order; EDF sorts by earliest deadline).
+ */
 void	enqueue_coder(t_dongle *dongle, t_coder *coder)
 {
 	if (dongle->queue_size == 0)
@@ -68,7 +74,10 @@ void	enqueue_coder(t_dongle *dongle, t_coder *coder)
 	}
 }
 
-/* Remove a specific coder from the queue */
+/*
+ * Removes a specific coder from the waitlist, shifting slot 1
+ * to slot 0 if needed.
+ */
 void	remove_coder(t_dongle *dongle, t_coder *coder)
 {
 	if (dongle->queue_size == 2)
@@ -92,6 +101,11 @@ void	remove_coder(t_dongle *dongle, t_coder *coder)
 	}
 }
 
+/*
+ * Releases a dongle: marks it unused, records the release timestamp
+ * for cooldown tracking, broadcasts the condition variable inside
+ * the mutex lock (helgrind-clean), then unlocks.
+ */
 void	release_dongle(t_dongle *dongle)
 {
 	pthread_mutex_lock(&dongle->dongle_lock);

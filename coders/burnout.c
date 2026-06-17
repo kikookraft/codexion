@@ -6,12 +6,16 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/02 12:32:36 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/12 14:56:50 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/17 12:28:13 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc.h"
 
+/*
+ * Iterates all coders and returns the index of the first one
+ * that has burned out, or -1 if none have.
+ */
 static int	check_burnouts(t_sim *sim, size_t current_time)
 {
 	int	i;
@@ -26,6 +30,10 @@ static int	check_burnouts(t_sim *sim, size_t current_time)
 	return (-1);
 }
 
+/*
+ * Monitor thread: polls every 1 ms under sim_lock. If a coder
+ * has burned out, calls end_simulation to stop the simulation.
+ */
 void	*burnout_monitor(void *arg)
 {
 	t_sim	*sim;
@@ -52,6 +60,10 @@ void	*burnout_monitor(void *arg)
 	return (NULL);
 }
 
+/*
+ * Sets is_running = 0 under sim_lock, then broadcasts on every
+ * dongle condition variable to wake all blocked coder threads.
+ */
 static void	stop_and_broadcast(t_sim *sim)
 {
 	int	i;
@@ -68,6 +80,11 @@ static void	stop_and_broadcast(t_sim *sim)
 	}
 }
 
+/*
+ * Stops the simulation: sets is_running = 0, prints the burnout
+ * message under print_lock, then broadcasts all dongle conditions
+ * so waiting threads can exit cleanly.
+ */
 void	end_simulation(t_sim *sim, int coder_id, int has_printed)
 {
 	size_t	current_time;
@@ -84,6 +101,11 @@ void	end_simulation(t_sim *sim, int coder_id, int has_printed)
 	stop_and_broadcast(sim);
 }
 
+/*
+ * Thread-safe burnout check: returns 1 if the coder has not started
+ * compiling within burnout_time ms since its last compile start.
+ * Checks all coders including those waiting for dongles (per subject).
+ */
 int	has_coder_burned_out(t_coder *coder)
 {
 	pthread_mutex_lock(&coder->coder_lock);

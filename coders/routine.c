@@ -6,12 +6,17 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 00:00:00 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/16 15:42:58 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/17 12:28:13 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc.h"
 
+/*
+ * Finalizes dongle acquisition: removes the coder from the queue,
+ * marks the dongle as used, prints "has taken a dongle" under
+ * print_lock. Returns 0 if simulation stopped mid-acquisition.
+ */
 static int	take_dongle_finish(t_coder *coder, t_dongle *dongle, int ok)
 {
 	remove_coder(dongle, coder);
@@ -38,6 +43,12 @@ static int	take_dongle_finish(t_coder *coder, t_dongle *dongle, int ok)
 	return (1);
 }
 
+/*
+ * Returns 1 if the coder should wait for this dongle:
+ * - dongle is in use (is_used)
+ * - coder is not first in priority queue (waiting[0])
+ * - fairness bump: coder just used the dongle and another coder is waiting
+ */
 static int	should_wait(t_coder *c, t_dongle *d)
 {
 	if (d->is_used || d->waiting[0] != c)
@@ -52,6 +63,12 @@ static int	should_wait(t_coder *c, t_dongle *d)
 	return (0);
 }
 
+/*
+ * Blocking dongle acquisition. Enqueues the coder in the priority
+ * queue, then waits until the dongle is free, cooldown has expired,
+ * and the coder is first in queue. Used for left dongle (always)
+ * and right dongle when coder count is even.
+ */
 int	take_dongle(t_coder *coder, t_dongle *dongle)
 {
 	int	running;
@@ -77,6 +94,10 @@ int	take_dongle(t_coder *coder, t_dongle *dongle)
 	return (take_dongle_finish(coder, dongle, running));
 }
 
+/*
+ * Helper: calls pthread_cond_timedwait with an absolute deadline.
+ * Returns 1 if the wait timed out (ETIMEDOUT), 0 if signaled.
+ */
 static int	timedwait_or_timeout(t_dongle *dongle, size_t deadline)
 {
 	struct timespec	ts;
@@ -89,6 +110,12 @@ static int	timedwait_or_timeout(t_dongle *dongle, size_t deadline)
 	return (ret == ETIMEDOUT);
 }
 
+/*
+ * Timeout-based dongle acquisition (used for odd coder counts).
+ * Same logic as take_dongle but uses pthread_cond_timedwait with
+ * an absolute deadline. Returns 0 on timeout so the caller can
+ * release the other dongle and retry, preventing hostage cascades.
+ */
 int	take_dongle_timeout(t_coder *coder, t_dongle *dongle, size_t timeout_ms)
 {
 	size_t	deadline;
