@@ -29,10 +29,10 @@ make
 
 Example:
 ```
-./codexion 5 200 50 100 100 3 10 fifo
+./codexion 5 200 40 20 10 3 10 edf
 ```
 
-## How it works
+# How it works
 
 ### Startup
 1. Arguments are parsed and validated (positive integers, overflow-checked via `strtol`, scheduler must be `fifo` or `edf`).
@@ -64,6 +64,7 @@ A dedicated monitor thread loops every 1 ms, checking every coder including thos
 After all coder threads have joined, `sim_ended()` checks `is_running` under `sim_lock`. If still true (all coders finished without burnout), it prints a success message. The burnout thread is then joined. All mutexes, condition variables are destroyed, and memory is freed.
 
 ## Concurrency handling
+or "Blocking cases handled" / "Thread synchronization mechanisms" as the subject want to title this part
 
 ### Deadlock prevention
 Coders with even IDs grab their left dongle first, odd IDs grab their right first. This asymmetric ordering prevents circular wait.
@@ -92,6 +93,12 @@ The `is_running` flag is declared `volatile` and is read through `is_simulation_
 - `pthread_cond_broadcast` in `release_dongle` and `end_simulation` to wake all waiters.
 
 The monitor communicates shutdown to coders via `is_running` (checked under `sim_lock` by `is_simulation_running()`) and broadcasts on all dongle condition variables. Every state-change function re-checks `is_running` before acting, ensuring clean shutdown.
+
+# Resources
+- https://codexion-visualizer.sacha-dev.me/
+- bgarde
+- acercy
+- cydupire
 
 ## AI usage
 
