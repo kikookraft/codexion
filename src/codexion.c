@@ -6,11 +6,11 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:20:59 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/17 12:28:13 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 15:44:31 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
-#include "coders/inc.h"
+#include "inc.h"
 
 /*
  * Thread entry point for each coder. Applies adaptive startup stagger

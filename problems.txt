@@ -1,0 +1,18 @@
+Init.c: 78/79 :
+Quand je quitte les mutex sont encore init alors que sim  se fait free
+
+Pthread peux fail, protéger avec un check
+
+126-127 a protéger
+
+
+Codexion ligne 81 malloc fail > segfault
+
+tester tout les mallocs a NULL
+tester valgrind breaker (chercher valgrind sur discord groupe et regarder goinfre dderny)
+
+-0  et +xxx ne passe pas au parsing
+
+Reviser le code pour une structure plus claire
+
+retructurer le code pour qu'il soit plus clair
