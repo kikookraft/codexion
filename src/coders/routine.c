@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 00:00:00 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 16:56:09 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 17:09:36 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -34,8 +34,7 @@ static int	take_dongle_finish(t_coder *coder, t_dongle *dongle, int ok)
 		pthread_mutex_unlock(&dongle->dongle_lock);
 		return (0);
 	}
-	log_action("has taken a dongle", coder->id,
-		get_time() - coder->sim->start_time);
+	log_action("has taken a dongle", coder->id);
 	pthread_mutex_unlock(&dongle->dongle_lock);
 	return (1);
 }

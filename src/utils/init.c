@@ -6,11 +6,53 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 14:35:48 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 15:52:39 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 17:11:58 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc.h"
+
+/*
+ * Allocates the simulation structure, parses all numeric arguments,
+ * initializes dongles, mutexes, and the scheduler.
+ */
+t_sim	*init_sim(char *argv[])
+{
+	t_sim	*sim;
+
+	sim = malloc(sizeof(t_sim));
+	if (!sim)
+		return (NULL);
+	sim->nb_coders = atoi(argv[1]);
+	sim->burnout_time = atoi(argv[2]);
+	sim->compile_time = atoi(argv[3]);
+	sim->debug_time = atoi(argv[4]);
+	sim->refactor_time = atoi(argv[5]);
+	sim->target_compiles = atoi(argv[6]);
+	sim->dongle_cooldown = atoi(argv[7]);
+	sim->is_running = 0;
+	sim->start_time = 0;
+	sim->dongles = init_dongle(sim->nb_coders);
+	pthread_mutex_init(&sim->print_lock, NULL);
+	pthread_mutex_init(&sim->sim_lock, NULL);
+	sim->scheduler = init_scheduler(argv);
+	sim->burnout_thread = (pthread_t)0;
+	if (!sim->dongles)
+	{
+		free(sim);
+		return (NULL);
+	}
+	return (sim);
+}
+
+/*
+ * Initializes miscellaneous simulation parameters.
+ */
+void	init_misc(t_sim *sim)
+{
+	set_simulation_start_time(get_time());
+	print_set_mutex(&sim->print_lock);
+}
 
 /*
  * Allocates and initializes an array of nb_coders dongles.
@@ -52,39 +94,6 @@ t_scheduler	init_scheduler(char *argv[])
 	else
 		scheduler = EDF;
 	return (scheduler);
-}
-
-/*
- * Allocates the simulation structure, parses all numeric arguments,
- * initializes dongles, mutexes, and the scheduler.
- */
-t_sim	*init_sim(char *argv[])
-{
-	t_sim	*sim;
-
-	sim = malloc(sizeof(t_sim));
-	if (!sim)
-		return (NULL);
-	sim->nb_coders = atoi(argv[1]);
-	sim->burnout_time = atoi(argv[2]);
-	sim->compile_time = atoi(argv[3]);
-	sim->debug_time = atoi(argv[4]);
-	sim->refactor_time = atoi(argv[5]);
-	sim->target_compiles = atoi(argv[6]);
-	sim->dongle_cooldown = atoi(argv[7]);
-	sim->is_running = 0;
-	sim->start_time = 0;
-	sim->dongles = init_dongle(sim->nb_coders);
-	pthread_mutex_init(&sim->print_lock, NULL);
-	pthread_mutex_init(&sim->sim_lock, NULL);
-	sim->scheduler = init_scheduler(argv);
-	sim->burnout_thread = (pthread_t)0;
-	if (!sim->dongles)
-	{
-		free(sim);
-		return (NULL);
-	}
-	return (sim);
 }
 
 /*

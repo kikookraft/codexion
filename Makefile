@@ -15,7 +15,8 @@ SRC = \
 	src/utils/init.c \
 	src/utils/queue.c \
 	src/utils/print.c \
-	src/simulation.c
+	src/simulation.c \
+	src/dongle/dongle.c
 
 OBJ = $(SRC:.c=.o)
 

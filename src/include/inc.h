@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 16:54:39 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 17:12:55 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -94,13 +94,15 @@ int			show_help(int helpId, int argc, char **argv);
 // ----- time.c -----
 size_t		get_time(void);
 void		msleep(size_t time);
-void		dongle_take_wait(t_dongle *dongle, t_coder *coder);
+void		set_simulation_start_time(size_t start);
+size_t		get_elapsed_time(void);
 
 // ----- init.c -----
+t_sim		*init_sim(char *argv[]);
 t_dongle	*init_dongle(int nb_coders);
 t_scheduler	init_scheduler(char *argv[]);
-t_sim		*init_sim(char *argv[]);
 void		init_coders(t_sim *sim);
+void		init_misc(t_sim *sim);
 
 // ----- queue.c -----
 void		enqueue_coder(t_dongle *dongle, t_coder *coder);
@@ -131,7 +133,10 @@ int			has_coder_burned_out(t_coder *coder);
 void		stop_and_broadcast(t_sim *sim);
 
 // ---- print.c -----
-void		log_action(char *message, int coder_id, size_t timestamp);
+void		log_action(char *message, int coder_id);
 void		print_set_mutex(pthread_mutex_t *lock);
 void		print_lock(int state);
 void		log_dongle(int coder_id, size_t timestamp);
+
+// ----- dongle.c -----
+void		dongle_take_wait(t_dongle *dongle, t_coder *coder);

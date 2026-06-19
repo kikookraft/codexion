@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 16:32:49 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 16:48:05 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 17:10:08 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,7 +32,7 @@ static void	compile_execute(t_coder *coder, t_dongle *l, t_dongle *r)
 	coder->last_compile_start = get_time();
 	pthread_mutex_unlock(&coder->coder_lock);
 	log_action(
-		"is compiling", coder->id, get_time() - coder->sim->start_time);
+		"is compiling", coder->id);
 	msleep(coder->sim->compile_time);
 	release_dongle(r);
 	release_dongle(l);
@@ -85,7 +85,7 @@ void	debug(t_coder *coder)
 	if (!is_simulation_running(coder->sim))
 		return ;
 	log_action(
-		"is debugging", coder->id, get_time() - coder->sim->start_time);
+		"is debugging", coder->id);
 	if (!is_simulation_running(coder->sim))
 		return ;
 	msleep(coder->sim->debug_time);
@@ -100,7 +100,7 @@ void	refactor(t_coder *coder)
 	if (!is_simulation_running(coder->sim))
 		return ;
 	log_action(
-		"is refactoring", coder->id, get_time() - coder->sim->start_time);
+		"is refactoring", coder->id);
 	if (!is_simulation_running(coder->sim))
 		return ;
 	msleep(coder->sim->refactor_time);

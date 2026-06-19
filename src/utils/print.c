@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/15 12:05:39 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 16:56:40 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 17:09:00 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -52,9 +52,9 @@ void	print_lock(int state)
  * Print a message with timestamp and coder_id under print_lock.
  * Automatucly lock / unlock the print mutex.
  */
-void	log_action(char *message, int coder_id, size_t timestamp)
+void	log_action(char *message, int coder_id)
 {
 	print_lock(1);
-	printf("%-5zu %-5d %s\n", timestamp, coder_id + 1, message);
+	printf("%-5zu %-5d %s\n", get_elapsed_time(), coder_id + 1, message);
 	print_lock(0);
 }
