@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 16:45:21 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 16:54:39 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -134,3 +134,4 @@ void		stop_and_broadcast(t_sim *sim);
 void		log_action(char *message, int coder_id, size_t timestamp);
 void		print_set_mutex(pthread_mutex_t *lock);
 void		print_lock(int state);
+void		log_dongle(int coder_id, size_t timestamp);
