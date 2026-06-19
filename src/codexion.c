@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:20:59 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 15:44:31 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 15:46:10 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,30 +65,6 @@ void	routine_loop(t_coder *coder, t_dongle *donglel, t_dongle *dongler)
 			break ;
 		refactor(coder);
 	}
-}
-
-/*
- * Initializes the simulation: records start time, allocates coder
- * array, spawns all coder threads plus the burnout monitor, waits
- * for all threads to finish, then prints the outcome.
- */
-int	start_simulation(t_sim *sim)
-{
-	int	i;
-
-	sim->start_time = get_time();
-	sim->is_running = 1;
-	sim->coders = malloc(sizeof(t_coder) * sim->nb_coders);
-	if (!sim->coders)
-		return (1);
-	init_coders(sim);
-	pthread_create(&sim->burnout_thread, NULL, burnout_monitor, sim);
-	i = -1;
-	while ((unsigned int)++i < sim->nb_coders)
-		pthread_join(sim->coders[i].thread, NULL);
-	sim_ended(sim);
-	pthread_join(sim->burnout_thread, NULL);
-	return (0);
 }
 
 /*

@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/02 12:32:36 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/17 12:28:13 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 16:00:21 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -64,7 +64,7 @@ void	*burnout_monitor(void *arg)
  * Sets is_running = 0 under sim_lock, then broadcasts on every
  * dongle condition variable to wake all blocked coder threads.
  */
-static void	stop_and_broadcast(t_sim *sim)
+void	stop_and_broadcast(t_sim *sim)
 {
 	int	i;
 
@@ -78,27 +78,6 @@ static void	stop_and_broadcast(t_sim *sim)
 		pthread_cond_broadcast(&sim->dongles[i].dongle_cond);
 		pthread_mutex_unlock(&sim->dongles[i].dongle_lock);
 	}
-}
-
-/*
- * Stops the simulation: sets is_running = 0, prints the burnout
- * message under print_lock, then broadcasts all dongle conditions
- * so waiting threads can exit cleanly.
- */
-void	end_simulation(t_sim *sim, int coder_id, int has_printed)
-{
-	size_t	current_time;
-
-	pthread_mutex_lock(&sim->sim_lock);
-	sim->is_running = 0;
-	pthread_mutex_unlock(&sim->sim_lock);
-	current_time = get_time();
-	pthread_mutex_lock(&sim->print_lock);
-	if (!has_printed)
-		printf("\e[0;31m%-5zu %-5d has burned out\e[0;37m\n",
-			current_time - sim->start_time, sim->coders[coder_id].id + 1);
-	pthread_mutex_unlock(&sim->print_lock);
-	stop_and_broadcast(sim);
 }
 
 /*

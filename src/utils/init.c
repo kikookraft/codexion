@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 14:35:48 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/17 12:28:13 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 15:52:39 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -85,25 +85,6 @@ t_sim	*init_sim(char *argv[])
 		return (NULL);
 	}
 	return (sim);
-}
-
-/*
- * Destroys all coder mutexes, dongle mutexes, dongle condition
- * variables, and the simulation-level mutexes.
- */
-void	cleanup_sim(t_sim *sim)
-{
-	int	i;
-
-	i = -1;
-	while (++i < (int)sim->nb_coders)
-	{
-		pthread_mutex_destroy(&sim->coders[i].coder_lock);
-		pthread_mutex_destroy(&sim->dongles[i].dongle_lock);
-		pthread_cond_destroy(&sim->dongles[i].dongle_cond);
-	}
-	pthread_mutex_destroy(&sim->print_lock);
-	pthread_mutex_destroy(&sim->sim_lock);
 }
 
 /*

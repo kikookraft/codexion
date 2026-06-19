@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 16:57:17 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/17 12:56:00 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 15:47:38 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -42,18 +42,6 @@ void	msleep(size_t time)
 		usleep(200);
 }
 
-/*
- * Thread-safe read of sim->is_running under sim_lock.
- */
-int	is_simulation_running(t_sim *sim)
-{
-	int	running;
-
-	pthread_mutex_lock(&sim->sim_lock);
-	running = sim->is_running;
-	pthread_mutex_unlock(&sim->sim_lock);
-	return (running);
-}
 
 /*
  * Called when a dongle is free but in cooldown. Computes the

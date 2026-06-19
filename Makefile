@@ -14,7 +14,8 @@ SRC = \
 	src/utils/time.c \
 	src/utils/init.c \
 	src/utils/queue.c \
-	src/utils/print.c
+	src/utils/print.c \
+	src/simulation.c
 
 OBJ = $(SRC:.c=.o)
 
@@ -24,7 +25,7 @@ $(NAME): $(OBJ)
 	$(CC) $(CFLAGS) $(OBJ) $(INCLUDES) -o $(NAME)
 
 %.o: %.c $(HEADER)
-	$(CC) $(CFLAGS) $(INCLUDES) -g -c $< -o $@
+	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 clean:
 	rm -f $(OBJ)
@@ -34,4 +35,6 @@ fclean: clean
 
 re: fclean all
 
+run: re
+	./$(NAME) 2 20 0 0 0 1 0 edf
 .PHONY: all clean fclean re
