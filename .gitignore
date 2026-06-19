@@ -8,3 +8,12 @@ utils/init.o
 utils/print.o
 utils/queue.o
 utils/time.o
+test.ut
+codexion_tester/.test/
+tester_log.txt
+.test
+.vscode/c_cpp_properties.json
+.vscode/launch.json
+.vscode/settings.json
+roadmap.txt
+subject.md
