@@ -6,36 +6,55 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/15 12:05:39 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/17 12:28:13 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 16:49:49 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc.h"
 
 /*
- * Prints a message under print_lock for serialized output.
+ * Returns a pointer to a static mutex pointer.
  */
-void	log_term(char *message, t_sim *sim)
+static pthread_mutex_t **get_print_lock_ptr(void)
 {
-	pthread_mutex_lock(&sim->print_lock);
-	printf("%s\n", message);
-	pthread_mutex_unlock(&sim->print_lock);
+    static pthread_mutex_t *lock;
+
+    return (&lock);
 }
 
 /*
- * Called after all coder threads finish. If no burnout occurred,
- * prints the success message and marks the simulation as ended.
+ * One‑time setup: call right after pthread_mutex_init.
  */
-void	sim_ended(t_sim *sim)
+void	print_set_mutex(pthread_mutex_t *lock)
 {
-	pthread_mutex_lock(&sim->sim_lock);
-	if (sim->is_running)
+	*get_print_lock_ptr() = lock;
+}
+
+/*
+ * Thread-safe print_lock wrapper: locks if state is 1, unlocks if 0.
+ * Does nothing if the mutex pointer is NULL.
+*/
+void	print_lock(int state)
+{
+	pthread_mutex_t	*lock;
+
+	lock = *get_print_lock_ptr();
+	if (lock)
 	{
-		sim->is_running = 0;
-		pthread_mutex_unlock(&sim->sim_lock);
-		printf("%sSimulation complete: all coders compiled %d times.%s\n",
-			"\e[0;32m", sim->target_compiles, "\e[0;37m");
+		if (state)
+			pthread_mutex_lock(lock);
+		else
+			pthread_mutex_unlock(lock);
 	}
-	else
-		pthread_mutex_unlock(&sim->sim_lock);
+}
+
+/*
+ * Print a message with timestamp and coder_id under print_lock.
+ * Automatucly lock / unlock the print mutex.
+ */
+void	log_action(char *message, int coder_id, size_t timestamp)
+{
+	print_lock(1);
+	printf("%-5zu %-5d %s\n", timestamp, coder_id + 1, message);
+	print_lock(0);
 }

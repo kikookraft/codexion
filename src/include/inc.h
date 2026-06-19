@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 16:00:01 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 16:45:21 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -118,7 +118,7 @@ void		refactor(t_coder *coder);
 int			take_dongle(t_coder *coder, t_dongle *dongle);
 int			take_dongle_timeout(t_coder *coder, t_dongle *dongle,
 				size_t timeout_ms);
-				
+
 // ----- simulation.c -----
 int			is_simulation_running(t_sim *sim);
 int			start_simulation(t_sim *sim);
@@ -131,5 +131,6 @@ int			has_coder_burned_out(t_coder *coder);
 void		stop_and_broadcast(t_sim *sim);
 
 // ---- print.c -----
-void		log_term(char *message, t_sim *sim);
-void		sim_ended(t_sim *sim);
+void		log_action(char *message, int coder_id, size_t timestamp);
+void		print_set_mutex(pthread_mutex_t *lock);
+void		print_lock(int state);

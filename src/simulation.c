@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 15:45:54 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 15:52:52 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 16:27:01 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -31,7 +31,9 @@ int	start_simulation(t_sim *sim)
 	i = -1;
 	while ((unsigned int)++i < sim->nb_coders)
 		pthread_join(sim->coders[i].thread, NULL);
-	sim_ended(sim);
+	pthread_mutex_lock(&sim->sim_lock);
+	sim->is_running = 0;
+	pthread_mutex_unlock(&sim->sim_lock);
 	pthread_join(sim->burnout_thread, NULL);
 	return (0);
 }

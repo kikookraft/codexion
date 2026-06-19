@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 16:32:49 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/17 12:28:13 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 16:48:05 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -22,10 +22,8 @@ static void	compile_execute(t_coder *coder, t_dongle *l, t_dongle *r)
 {
 	if (!is_simulation_running(coder->sim))
 		return ;
-	pthread_mutex_lock(&coder->sim->print_lock);
 	if (!is_simulation_running(coder->sim))
 	{
-		pthread_mutex_unlock(&coder->sim->print_lock);
 		release_dongle(r);
 		release_dongle(l);
 		return ;
@@ -33,9 +31,8 @@ static void	compile_execute(t_coder *coder, t_dongle *l, t_dongle *r)
 	pthread_mutex_lock(&coder->coder_lock);
 	coder->last_compile_start = get_time();
 	pthread_mutex_unlock(&coder->coder_lock);
-	printf("%-5zu %-5d is compiling\n",
-		get_time() - coder->sim->start_time, coder->id + 1);
-	pthread_mutex_unlock(&coder->sim->print_lock);
+	log_action(
+		"is compiling", coder->id, get_time() - coder->sim->start_time);
 	msleep(coder->sim->compile_time);
 	release_dongle(r);
 	release_dongle(l);
@@ -85,15 +82,10 @@ void	compile(t_coder *coder, t_dongle *l, t_dongle *r)
  */
 void	debug(t_coder *coder)
 {
-	pthread_mutex_lock(&coder->sim->print_lock);
 	if (!is_simulation_running(coder->sim))
-	{
-		pthread_mutex_unlock(&coder->sim->print_lock);
 		return ;
-	}
-	printf("%-5zu %-5d is debugging\n",
-		get_time() - coder->sim->start_time, coder->id + 1);
-	pthread_mutex_unlock(&coder->sim->print_lock);
+	log_action(
+		"is debugging", coder->id, get_time() - coder->sim->start_time);
 	if (!is_simulation_running(coder->sim))
 		return ;
 	msleep(coder->sim->debug_time);
@@ -105,15 +97,10 @@ void	debug(t_coder *coder)
  */
 void	refactor(t_coder *coder)
 {
-	pthread_mutex_lock(&coder->sim->print_lock);
 	if (!is_simulation_running(coder->sim))
-	{
-		pthread_mutex_unlock(&coder->sim->print_lock);
 		return ;
-	}
-	printf("%-5zu %-5d is refactoring\n",
-		get_time() - coder->sim->start_time, coder->id + 1);
-	pthread_mutex_unlock(&coder->sim->print_lock);
+	log_action(
+		"is refactoring", coder->id, get_time() - coder->sim->start_time);
 	if (!is_simulation_running(coder->sim))
 		return ;
 	msleep(coder->sim->refactor_time);

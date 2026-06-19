@@ -4,10 +4,9 @@ test.ut
 codexion_tester/.test/
 tester_log.txt
 .test
-.vscode/c_cpp_properties.json
-.vscode/launch.json
-.vscode/settings.json
+.vscode/**
 roadmap.txt
 subject.md
 src/simulation.o
 **.o
+src/**.o
