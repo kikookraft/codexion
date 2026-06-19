@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/15 12:05:39 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 17:09:00 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 17:20:07 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -15,11 +15,11 @@
 /*
  * Returns a pointer to a static mutex pointer.
  */
-static pthread_mutex_t **get_print_lock_ptr(void)
+static pthread_mutex_t	**get_print_lock_ptr(void)
 {
-    static pthread_mutex_t *lock;
+	static pthread_mutex_t	*lock;
 
-    return (&lock);
+	return (&lock);
 }
 
 /*
