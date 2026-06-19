@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 12:00:00 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/17 12:28:19 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 18:33:40 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -99,18 +99,4 @@ void	remove_coder(t_dongle *dongle, t_coder *coder)
 		dongle->waiting[0] = NULL;
 		dongle->queue_size = 0;
 	}
-}
-
-/*
- * Releases a dongle: marks it unused, records the release timestamp
- * for cooldown tracking, broadcasts the condition variable inside
- * the mutex lock (helgrind-clean), then unlocks.
- */
-void	release_dongle(t_dongle *dongle)
-{
-	pthread_mutex_lock(&dongle->dongle_lock);
-	dongle->is_used = 0;
-	dongle->last_used = get_time();
-	pthread_cond_broadcast(&dongle->dongle_cond);
-	pthread_mutex_unlock(&dongle->dongle_lock);
 }

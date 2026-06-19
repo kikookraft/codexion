@@ -6,37 +6,43 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 00:00:00 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 17:09:36 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 18:43:16 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc.h"
 
 /*
- * Finalizes dongle acquisition: removes the coder from the queue,
- * marks the dongle as used, prints "has taken a dongle" under
- * print_lock. Returns 0 if simulation stopped mid-acquisition.
+ * Thread entry point for each coder. Applies adaptive startup stagger
+ * (even-first for even coder counts, odd-first for odd counts),
+ * resolves the coder's left/right dongle pair using alternating ordering
+ * to prevent deadlock, then enters the compile-debug-refactor loop.
  */
-static int	take_dongle_finish(t_coder *coder, t_dongle *dongle, int ok)
+void	*coder_routine(void *arg)
 {
-	remove_coder(dongle, coder);
-	if (!ok)
+	t_coder		*coder;
+	t_dongle	*donglel;
+	t_dongle	*dongler;
+
+	coder = (t_coder *)arg;
+	if (coder->sim->nb_coders % 2 == 0 && coder->id % 2 != 0)
+		usleep(500);
+	else if (coder->sim->nb_coders % 2 != 0 && coder->id % 2 == 0)
+		usleep(500);
+	if (coder->id % 2 == 0)
 	{
-		pthread_cond_broadcast(&dongle->dongle_cond);
-		pthread_mutex_unlock(&dongle->dongle_lock);
-		return (0);
+		donglel = &coder->sim->dongles[coder->id];
+		dongler = &coder->sim->dongles[(coder->id + 1)
+			% coder->sim->nb_coders];
 	}
-	dongle->is_used = 1;
-	dongle->last_user = coder->id;
-	if (!coder->sim->is_running)
+	else
 	{
-		pthread_cond_broadcast(&dongle->dongle_cond);
-		pthread_mutex_unlock(&dongle->dongle_lock);
-		return (0);
+		donglel = &coder->sim->dongles[(coder->id + 1)
+			% coder->sim->nb_coders];
+		dongler = &coder->sim->dongles[coder->id];
 	}
-	log_action("has taken a dongle", coder->id);
-	pthread_mutex_unlock(&dongle->dongle_lock);
-	return (1);
+	routine_loop(coder, donglel, dongler);
+	return (NULL);
 }
 
 /*
@@ -45,7 +51,7 @@ static int	take_dongle_finish(t_coder *coder, t_dongle *dongle, int ok)
  * - coder is not first in priority queue (waiting[0])
  * - fairness bump: coder just used the dongle and another coder is waiting
  */
-static int	should_wait(t_coder *c, t_dongle *d)
+int	should_wait(t_coder *c, t_dongle *d)
 {
 	if (d->is_used || d->waiting[0] != c)
 		return (1);
@@ -59,42 +65,12 @@ static int	should_wait(t_coder *c, t_dongle *d)
 	return (0);
 }
 
-/*
- * Blocking dongle acquisition. Enqueues the coder in the priority
- * queue, then waits until the dongle is free, cooldown has expired,
- * and the coder is first in queue. Used for left dongle (always)
- * and right dongle when coder count is even.
- */
-int	take_dongle(t_coder *coder, t_dongle *dongle)
-{
-	int	running;
-
-	pthread_mutex_lock(&dongle->dongle_lock);
-	enqueue_coder(dongle, coder);
-	pthread_mutex_lock(&coder->coder_lock);
-	coder->is_waiting = 1;
-	pthread_mutex_unlock(&coder->coder_lock);
-	while (is_simulation_running(coder->sim))
-	{
-		if (should_wait(coder, dongle))
-			pthread_cond_wait(&dongle->dongle_cond, &dongle->dongle_lock);
-		else if (dongle->last_used + coder->sim->dongle_cooldown > get_time())
-			dongle_take_wait(dongle, coder);
-		else
-			break ;
-	}
-	running = is_simulation_running(coder->sim);
-	pthread_mutex_lock(&coder->coder_lock);
-	coder->is_waiting = 0;
-	pthread_mutex_unlock(&coder->coder_lock);
-	return (take_dongle_finish(coder, dongle, running));
-}
 
 /*
  * Helper: calls pthread_cond_timedwait with an absolute deadline.
  * Returns 1 if the wait timed out (ETIMEDOUT), 0 if signaled.
  */
-static int	timedwait_or_timeout(t_dongle *dongle, size_t deadline)
+int	timedwait_or_timeout(t_dongle *dongle, size_t deadline)
 {
 	struct timespec	ts;
 	int				ret;
@@ -106,36 +82,3 @@ static int	timedwait_or_timeout(t_dongle *dongle, size_t deadline)
 	return (ret == ETIMEDOUT);
 }
 
-/*
- * Timeout-based dongle acquisition (used for odd coder counts).
- * Same logic as take_dongle but uses pthread_cond_timedwait with
- * an absolute deadline. Returns 0 on timeout so the caller can
- * release the other dongle and retry, preventing hostage cascades.
- */
-int	take_dongle_timeout(t_coder *coder, t_dongle *dongle, size_t timeout_ms)
-{
-	size_t	deadline;
-
-	pthread_mutex_lock(&dongle->dongle_lock);
-	enqueue_coder(dongle, coder);
-	deadline = get_time() + timeout_ms;
-	while (is_simulation_running(coder->sim))
-	{
-		if (should_wait(coder, dongle))
-		{
-			if (timedwait_or_timeout(dongle, deadline))
-				return (take_dongle_finish(coder, dongle, 0));
-		}
-		else if (dongle->last_used
-			+ coder->sim->dongle_cooldown > get_time())
-		{
-			if (dongle->last_used
-				+ coder->sim->dongle_cooldown > deadline)
-				return (take_dongle_finish(coder, dongle, 0));
-			dongle_take_wait(dongle, coder);
-		}
-		else
-			break ;
-	}
-	return (take_dongle_finish(coder, dongle, 1));
-}

@@ -7,7 +7,8 @@ HEADER   = src/include/inc.h
 
 SRC = \
 	src/codexion.c \
-	src/coders/parse.c \
+	src/parse.c \
+	src/simulation.c \
 	src/coders/routine.c \
 	src/coders/action.c \
 	src/coders/burnout.c \
@@ -15,7 +16,6 @@ SRC = \
 	src/utils/init.c \
 	src/utils/queue.c \
 	src/utils/print.c \
-	src/simulation.c \
 	src/dongle/dongle.c
 
 OBJ = $(SRC:.c=.o)

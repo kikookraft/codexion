@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 15:45:54 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 17:10:26 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 18:49:25 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,7 @@ void	end_simulation(t_sim *sim, int coder_id, int has_printed)
 	pthread_mutex_unlock(&sim->sim_lock);
 	current_time = get_time();
 	if (!has_printed)
-		log_action("has burned out", coder_id);
+		log_action("\033[31mhas burned out\033[0m", coder_id);
 	stop_and_broadcast(sim);
 }
 

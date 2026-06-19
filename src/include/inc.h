@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 17:12:55 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 18:49:06 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -92,34 +92,32 @@ int			check_args(int argc, char **argv);
 int			show_help(int helpId, int argc, char **argv);
 
 // ----- time.c -----
-size_t		get_time(void);
-void		msleep(size_t time);
 void		set_simulation_start_time(size_t start);
+size_t		get_time(void);
 size_t		get_elapsed_time(void);
+void		msleep(size_t time);
 
 // ----- init.c -----
 t_sim		*init_sim(char *argv[]);
+void		init_misc(t_sim *sim);
 t_dongle	*init_dongle(int nb_coders);
 t_scheduler	init_scheduler(char *argv[]);
 void		init_coders(t_sim *sim);
-void		init_misc(t_sim *sim);
 
 // ----- queue.c -----
 void		enqueue_coder(t_dongle *dongle, t_coder *coder);
 void		remove_coder(t_dongle *dongle, t_coder *coder);
-void		release_dongle(t_dongle *dongle);
 
 // ----- action.c -----
-void		*coder_routine(void *arg);
 void		routine_loop(t_coder *coder, t_dongle *donglel, t_dongle *dongler);
 void		compile(t_coder *coder, t_dongle *l_dongle, t_dongle *r_dongle);
 void		debug(t_coder *coder);
 void		refactor(t_coder *coder);
 
 // ----- routine.c -----
-int			take_dongle(t_coder *coder, t_dongle *dongle);
-int			take_dongle_timeout(t_coder *coder, t_dongle *dongle,
-				size_t timeout_ms);
+void		*coder_routine(void *arg);
+int			should_wait(t_coder *c, t_dongle *d);
+int			timedwait_or_timeout(t_dongle *dongle, size_t deadline);
 
 // ----- simulation.c -----
 int			is_simulation_running(t_sim *sim);
@@ -129,14 +127,18 @@ void		cleanup_sim(t_sim *sim);
 
 // ----- burnout.c -----
 void		*burnout_monitor(void *arg);
-int			has_coder_burned_out(t_coder *coder);
 void		stop_and_broadcast(t_sim *sim);
+int			has_coder_burned_out(t_coder *coder);
 
 // ---- print.c -----
-void		log_action(char *message, int coder_id);
 void		print_set_mutex(pthread_mutex_t *lock);
 void		print_lock(int state);
-void		log_dongle(int coder_id, size_t timestamp);
+void		log_action(char *message, int coder_id);
 
 // ----- dongle.c -----
 void		dongle_take_wait(t_dongle *dongle, t_coder *coder);
+int			take_dongle(t_coder *coder, t_dongle *dongle);
+int			take_dongle_timeout(t_coder *coder, t_dongle *dongle,
+				size_t timeout_ms);
+void		release_dongle(t_dongle *dongle);
+int			take_dongle_finish(t_coder *coder, t_dongle *dongle, int ok);

@@ -6,11 +6,33 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 16:32:49 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 17:10:08 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/19 18:30:49 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc.h"
+
+/*
+ * Main coder loop: repeats compile -> debug -> refactor until the
+ * required number of compiles is reached or the simulation stops.
+ */
+void	routine_loop(t_coder *coder, t_dongle *donglel, t_dongle *dongler)
+{
+	int	i;
+
+	i = -1;
+	while ((unsigned int)++i < coder->sim->target_compiles
+		&& is_simulation_running(coder->sim))
+	{
+		compile(coder, donglel, dongler);
+		if (!is_simulation_running(coder->sim))
+			break ;
+		debug(coder);
+		if (!is_simulation_running(coder->sim))
+			break ;
+		refactor(coder);
+	}
+}
 
 /*
  * Executes the compile phase once both dongles are held:
@@ -31,8 +53,7 @@ static void	compile_execute(t_coder *coder, t_dongle *l, t_dongle *r)
 	pthread_mutex_lock(&coder->coder_lock);
 	coder->last_compile_start = get_time();
 	pthread_mutex_unlock(&coder->coder_lock);
-	log_action(
-		"is compiling", coder->id);
+	log_action("is compiling", coder->id);
 	msleep(coder->sim->compile_time);
 	release_dongle(r);
 	release_dongle(l);
@@ -84,8 +105,7 @@ void	debug(t_coder *coder)
 {
 	if (!is_simulation_running(coder->sim))
 		return ;
-	log_action(
-		"is debugging", coder->id);
+	log_action("is debugging", coder->id);
 	if (!is_simulation_running(coder->sim))
 		return ;
 	msleep(coder->sim->debug_time);
@@ -99,8 +119,7 @@ void	refactor(t_coder *coder)
 {
 	if (!is_simulation_running(coder->sim))
 		return ;
-	log_action(
-		"is refactoring", coder->id);
+	log_action("is refactoring", coder->id);
 	if (!is_simulation_running(coder->sim))
 		return ;
 	msleep(coder->sim->refactor_time);
