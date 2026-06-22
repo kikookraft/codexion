@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/27 00:00:00 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 18:43:16 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/22 15:31:59 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -65,7 +65,6 @@ int	should_wait(t_coder *c, t_dongle *d)
 	return (0);
 }
 
-
 /*
  * Helper: calls pthread_cond_timedwait with an absolute deadline.
  * Returns 1 if the wait timed out (ETIMEDOUT), 0 if signaled.
@@ -81,4 +80,3 @@ int	timedwait_or_timeout(t_dongle *dongle, size_t deadline)
 			&dongle->dongle_lock, &ts);
 	return (ret == ETIMEDOUT);
 }
-

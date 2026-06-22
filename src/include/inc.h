@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 18:49:06 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/22 15:28:49 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -69,6 +69,8 @@ typedef struct s_sim
 	unsigned int	target_compiles;
 	unsigned int	dongle_cooldown;
 	volatile int	is_running;
+	volatile int	burnout_printed;
+	int				burned_out_coder;
 	size_t			start_time;
 	t_coder			*coders;
 }	t_sim;
@@ -90,6 +92,7 @@ typedef struct s_coder
 // ----- parse.c -----
 int			check_args(int argc, char **argv);
 int			show_help(int helpId, int argc, char **argv);
+void		parse_sim_args(t_sim *sim, char *argv[]);
 
 // ----- time.c -----
 void		set_simulation_start_time(size_t start);
@@ -102,7 +105,7 @@ t_sim		*init_sim(char *argv[]);
 void		init_misc(t_sim *sim);
 t_dongle	*init_dongle(int nb_coders);
 t_scheduler	init_scheduler(char *argv[]);
-void		init_coders(t_sim *sim);
+int			init_coders(t_sim *sim);
 
 // ----- queue.c -----
 void		enqueue_coder(t_dongle *dongle, t_coder *coder);
@@ -122,7 +125,7 @@ int			timedwait_or_timeout(t_dongle *dongle, size_t deadline);
 // ----- simulation.c -----
 int			is_simulation_running(t_sim *sim);
 int			start_simulation(t_sim *sim);
-void		end_simulation(t_sim *sim, int coder_id, int has_printed);
+void		end_simulation(t_sim *sim, int coder_id);
 void		cleanup_sim(t_sim *sim);
 
 // ----- burnout.c -----
@@ -134,6 +137,15 @@ int			has_coder_burned_out(t_coder *coder);
 void		print_set_mutex(pthread_mutex_t *lock);
 void		print_lock(int state);
 void		log_action(char *message, int coder_id);
+void		suppress_logs(void);
+int			is_logging_suppressed(void);
+
+// ---- safe.c -----
+int			safe_mutex_lock(pthread_mutex_t *m);
+int			safe_mutex_unlock(pthread_mutex_t *m);
+int			safe_mutex_init(pthread_mutex_t *m);
+int			safe_cond_init(pthread_cond_t *c);
+int			safe_thread_create(pthread_t *t, void *(*f)(void *), void *arg);
 
 // ----- dongle.c -----
 void		dongle_take_wait(t_dongle *dongle, t_coder *coder);

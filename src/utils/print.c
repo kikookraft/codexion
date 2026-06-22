@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/15 12:05:39 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 17:20:07 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/22 15:28:49 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,11 +50,17 @@ void	print_lock(int state)
 
 /*
  * Print a message with timestamp and coder_id under print_lock.
- * Automatucly lock / unlock the print mutex.
+ * Automatically lock / unlock the print mutex.
+ * If logs are suppressed, returns without printing.
  */
 void	log_action(char *message, int coder_id)
 {
 	print_lock(1);
+	if (is_logging_suppressed())
+	{
+		print_lock(0);
+		return ;
+	}
 	printf("%-5zu %-5d %s\n", get_elapsed_time(), coder_id + 1, message);
 	print_lock(0);
 }

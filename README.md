@@ -35,7 +35,7 @@ Example:
 # How it works
 
 ### Startup
-1. Arguments are parsed and validated (positive integers, overflow-checked via `strtol`, scheduler must be `fifo` or `edf`).
+1. Arguments are parsed and validated (positive integers validated via `atoi`, accepts `+` prefix and `-0` for compatible arguments, scheduler must be `fifo` or `edf`).
 2. The simulation structure is allocated, dongles are initialized with their own mutex and condition variable.
 3. Coder threads are created with an adaptive startup stagger: for even coder counts, odd-indexed coders wait 500 µs (even-first pipeline); for odd coder counts, even-indexed coders wait 500 µs (odd-first pipeline). This establishes a balanced compile order and prevents pipeline contention.
 4. Each coder uses an odd/even dongle ordering to prevent deadlock.
@@ -58,10 +58,10 @@ Each dongle holds a 2-slot waitlist sorted by the active scheduler:
 - **EDF**: the coder with the earliest burnout deadline (`last_compile_start + burnout`) is served first. Equal deadlines break by lower coder ID.
 
 ### Burnout detection
-A dedicated monitor thread loops every 1 ms, checking every coder including those waiting for dongles. Per the subject, any coder that has not started compiling within `burnout` ms burns out. A coder burns out when `get_time() - last_compile_start >= burnout`. On detection, `end_simulation` sets `is_running = 0` under `sim_lock`, prints the burnout message under `print_lock`, and broadcasts all dongle condition variables so waiting threads exit cleanly.
+A dedicated monitor thread loops every 1 ms, checking every coder including those waiting for dongles. Per the subject, any coder that has not started compiling within `burnout` ms burns out. A coder burns out when `get_time() - last_compile_start >= burnout`. On detection, `end_simulation` acquires `print_lock`, calls `suppress_logs()` to block future coder messages, prints the burnout message directly under the lock, then sets `is_running = 0` under `sim_lock` and broadcasts all dongle condition variables so waiting threads exit cleanly.
 
 ### Shutdown
-After all coder threads have joined, `sim_ended()` checks `is_running` under `sim_lock`. If still true (all coders finished without burnout), it prints a success message. The burnout thread is then joined. All mutexes, condition variables are destroyed, and memory is freed.
+After all coder threads have joined, the burnout thread is joined. All mutexes and condition variables are destroyed via `cleanup_sim()` — which safely guards against `NULL` coders (e.g. when a malloc failure caused early exit). The `main` function always runs the full cleanup sequence regardless of simulation outcome, preventing memory leaks on error paths.
 
 ## Concurrency handling
 or "Blocking cases handled" / "Thread synchronization mechanisms" as the subject want to title this part
@@ -79,10 +79,13 @@ After release, a dongle records a `last_used` timestamp. Any coder attempting to
 All state change messages go through a single `print_lock` mutex, guaranteeing no two messages interleave on stdout.
 
 ### Precise burnout detection
-The monitor thread checks burnout conditions under `sim_lock`. The burnout log is printed under `print_lock`, and `is_running` is set to 0 before broadcasting dongle condition variables. Every state-change function (`compile`, `debug`, `refactor`, `take_dongle_finish`) re-checks `is_running` under `print_lock` before printing, preventing stale messages from appearing after a burnout log.
+The monitor thread checks burnout conditions under `sim_lock`. When burnout is detected, `suppress_logs()` sets a global flag, then the burnout message is printed directly while holding `print_lock`. This guarantees no coder message can appear after the burnout line — any coder entering `log_action` afterwards finds the suppress flag set and returns immediately without printing.
 
 ### Race condition on `is_running`
 The `is_running` flag is declared `volatile` and is read through `is_simulation_running()`, which acquires `sim_lock`. The shutdown sequence writes `is_running = 0` under both `sim_lock` and each `dongle_lock`, then broadcasts on the dongle condition variables. This ensures that threads blocked in `pthread_cond_wait` see the updated value when they wake up and re-evaluate their while conditions.
+
+### Error resilience
+All `malloc` calls check for `NULL` and propagate the error with proper cleanup. All `pthread_create`, `pthread_mutex_init`, `pthread_mutex_lock`, `pthread_mutex_unlock`, `pthread_cond_init` calls are wrapped in safe functions (`safe.c`) that check return values. On any initialization failure, previously allocated resources (mutexes, conditions, threads) are destroyed before returning.
 
 ## Thread synchronization mechanisms
 

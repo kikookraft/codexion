@@ -6,34 +6,55 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 15:45:54 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 18:49:25 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/22 17:20:54 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "inc.h"
 
 /*
+ * Joins all coder threads (used both in normal completion
+ * and during error cleanup).
+ */
+static void	join_coders(t_sim *sim)
+{
+	unsigned int	i;
+
+	i = 0;
+	while (i < sim->nb_coders)
+		pthread_join(sim->coders[i++].thread, NULL);
+}
+
+/*
  * Initializes the simulation: records start time, allocates coder
  * array, spawns all coder threads plus the burnout monitor, waits
- * for all threads to finish, then prints the outcome.
+ * for all threads to finish, then returns.
+ * Returns 0 on success, 1 on failure.
  */
 int	start_simulation(t_sim *sim)
 {
-	int	i;
-
 	sim->start_time = get_time();
 	sim->is_running = 1;
 	sim->coders = malloc(sizeof(t_coder) * sim->nb_coders);
 	if (!sim->coders)
 		return (1);
-	init_coders(sim);
-	pthread_create(&sim->burnout_thread, NULL, burnout_monitor, sim);
-	i = -1;
-	while ((unsigned int)++i < sim->nb_coders)
-		pthread_join(sim->coders[i].thread, NULL);
-	pthread_mutex_lock(&sim->sim_lock);
+	if (init_coders(sim))
+	{
+		free(sim->coders);
+		sim->coders = NULL;
+		return (1);
+	}
+	if (safe_thread_create(&sim->burnout_thread, burnout_monitor, sim))
+	{
+		join_coders(sim);
+		free(sim->coders);
+		sim->coders = NULL;
+		return (1);
+	}
+	join_coders(sim);
+	safe_mutex_lock(&sim->sim_lock);
 	sim->is_running = 0;
-	pthread_mutex_unlock(&sim->sim_lock);
+	safe_mutex_unlock(&sim->sim_lock);
 	pthread_join(sim->burnout_thread, NULL);
 	return (0);
 }
@@ -45,27 +66,29 @@ int	is_simulation_running(t_sim *sim)
 {
 	int	running;
 
-	pthread_mutex_lock(&sim->sim_lock);
+	safe_mutex_lock(&sim->sim_lock);
 	running = sim->is_running;
-	pthread_mutex_unlock(&sim->sim_lock);
+	safe_mutex_unlock(&sim->sim_lock);
 	return (running);
 }
 
 /*
- * Stops the simulation: sets is_running = 0, prints the burnout
- * message under print_lock, then broadcasts all dongle conditions
- * so waiting threads can exit cleanly.
+ * Stops the simulation: acquires print_lock to block any in-flight
+ * coder messages, suppresses future logs, prints the burnout message
+ * directly under the lock (so it cannot be followed by coder output),
+ * then broadcasts all dongle conditions so waiting threads exit.
  */
-void	end_simulation(t_sim *sim, int coder_id, int has_printed)
+void	end_simulation(t_sim *sim, int coder_id)
 {
-	size_t	current_time;
-
-	pthread_mutex_lock(&sim->sim_lock);
+	print_lock(1);
+	suppress_logs();
+	printf("%-5zu %-5d \033[31mhas burned out\033[0m\n",
+		get_elapsed_time(), coder_id + 1);
+	print_lock(0);
+	safe_mutex_lock(&sim->sim_lock);
 	sim->is_running = 0;
-	pthread_mutex_unlock(&sim->sim_lock);
-	current_time = get_time();
-	if (!has_printed)
-		log_action("\033[31mhas burned out\033[0m", coder_id);
+	sim->burned_out_coder = coder_id;
+	safe_mutex_unlock(&sim->sim_lock);
 	stop_and_broadcast(sim);
 }
 
@@ -78,9 +101,14 @@ void	cleanup_sim(t_sim *sim)
 	int	i;
 
 	i = -1;
+	if (sim->coders)
+	{
+		while (++i < (int)sim->nb_coders)
+			pthread_mutex_destroy(&sim->coders[i].coder_lock);
+	}
+	i = -1;
 	while (++i < (int)sim->nb_coders)
 	{
-		pthread_mutex_destroy(&sim->coders[i].coder_lock);
 		pthread_mutex_destroy(&sim->dongles[i].dongle_lock);
 		pthread_cond_destroy(&sim->dongles[i].dongle_cond);
 	}

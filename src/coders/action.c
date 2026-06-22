@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/01 16:32:49 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 18:30:49 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/22 15:31:26 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,16 +50,16 @@ static void	compile_execute(t_coder *coder, t_dongle *l, t_dongle *r)
 		release_dongle(l);
 		return ;
 	}
-	pthread_mutex_lock(&coder->coder_lock);
+	safe_mutex_lock(&coder->coder_lock);
 	coder->last_compile_start = get_time();
-	pthread_mutex_unlock(&coder->coder_lock);
+	safe_mutex_unlock(&coder->coder_lock);
 	log_action("is compiling", coder->id);
 	msleep(coder->sim->compile_time);
 	release_dongle(r);
 	release_dongle(l);
-	pthread_mutex_lock(&coder->coder_lock);
+	safe_mutex_lock(&coder->coder_lock);
 	coder->times_compiled++;
-	pthread_mutex_unlock(&coder->coder_lock);
+	safe_mutex_unlock(&coder->coder_lock);
 }
 
 /*
@@ -74,9 +74,8 @@ void	compile(t_coder *coder, t_dongle *l, t_dongle *r)
 
 	if (coder->sim->nb_coders % 2 == 0)
 	{
-		if (!take_dongle(coder, l))
-			return ;
-		if (!take_dongle(coder, r) && (release_dongle(l), 1))
+		if (!take_dongle(coder, l)
+			|| (!take_dongle(coder, r) && (release_dongle(l), 1)))
 			return ;
 	}
 	else

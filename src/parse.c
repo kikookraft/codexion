@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/07 14:54:04 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/12 14:56:50 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/22 17:30:13 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -23,6 +23,8 @@ static int	is_valid_number(const char *str)
 	int	i;
 
 	i = 0;
+	if (str[i] == '+' || str[i] == '-')
+		i++;
 	if (str[i] == '\0')
 		return (0);
 	while (str[i])
@@ -37,7 +39,7 @@ static int	is_valid_number(const char *str)
 int	check_args(int argc, char **argv)
 {
 	int		i;
-	long	val;
+	int		val;
 
 	if (argc != NB_ARGS)
 		return (show_help(0, argc, argv));
@@ -46,9 +48,8 @@ int	check_args(int argc, char **argv)
 	{
 		if (!is_valid_number(argv[i]))
 			return (show_help(i, argc, argv));
-		val = strtol(argv[i], NULL, 10);
-		if (val < 0 || val > 2147483647
-			|| (val <= 0 && i == 1))
+		val = atoi(argv[i]);
+		if (val < 0 || (val <= 0 && i == 1))
 			return (show_help(i, argc, argv));
 	}
 	if (strcmp(argv[i], "fifo") && strcmp(argv[i], "edf"))
@@ -104,4 +105,19 @@ int	show_help(int helpId, int argc, char **argv)
 			argv[helpId]);
 	}
 	return (1);
+}
+
+/*
+ * Parses all numeric simulation arguments from argv into sim.
+ * Called after sim is allocated and zeroed via memset.
+ */
+void	parse_sim_args(t_sim *sim, char *argv[])
+{
+	sim->nb_coders = atoi(argv[1]);
+	sim->burnout_time = atoi(argv[2]);
+	sim->compile_time = atoi(argv[3]);
+	sim->debug_time = atoi(argv[4]);
+	sim->refactor_time = atoi(argv[5]);
+	sim->target_compiles = atoi(argv[6]);
+	sim->dongle_cooldown = atoi(argv[7]);
 }

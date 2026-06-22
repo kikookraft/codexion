@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 17:02:59 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/19 18:46:18 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/22 17:21:11 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -50,24 +50,26 @@ int	take_dongle(t_coder *coder, t_dongle *dongle)
 {
 	int	running;
 
-	pthread_mutex_lock(&dongle->dongle_lock);
+	safe_mutex_lock(&dongle->dongle_lock);
 	enqueue_coder(dongle, coder);
-	pthread_mutex_lock(&coder->coder_lock);
+	safe_mutex_lock(&coder->coder_lock);
 	coder->is_waiting = 1;
-	pthread_mutex_unlock(&coder->coder_lock);
+	safe_mutex_unlock(&coder->coder_lock);
 	while (is_simulation_running(coder->sim))
 	{
 		if (should_wait(coder, dongle))
-			pthread_cond_wait(&dongle->dongle_cond, &dongle->dongle_lock);
-		else if (dongle->last_used + coder->sim->dongle_cooldown > get_time())
+			pthread_cond_wait(&dongle->dongle_cond,
+				&dongle->dongle_lock);
+		else if (dongle->last_used
+			+ coder->sim->dongle_cooldown > get_time())
 			dongle_take_wait(dongle, coder);
 		else
 			break ;
 	}
 	running = is_simulation_running(coder->sim);
-	pthread_mutex_lock(&coder->coder_lock);
+	safe_mutex_lock(&coder->coder_lock);
 	coder->is_waiting = 0;
-	pthread_mutex_unlock(&coder->coder_lock);
+	safe_mutex_unlock(&coder->coder_lock);
 	return (take_dongle_finish(coder, dongle, running));
 }
 
@@ -81,7 +83,7 @@ int	take_dongle_timeout(t_coder *coder, t_dongle *dongle, size_t timeout_ms)
 {
 	size_t	deadline;
 
-	pthread_mutex_lock(&dongle->dongle_lock);
+	safe_mutex_lock(&dongle->dongle_lock);
 	enqueue_coder(dongle, coder);
 	deadline = get_time() + timeout_ms;
 	while (is_simulation_running(coder->sim))
@@ -105,7 +107,6 @@ int	take_dongle_timeout(t_coder *coder, t_dongle *dongle, size_t timeout_ms)
 	return (take_dongle_finish(coder, dongle, 1));
 }
 
-
 /*
  * Finalizes dongle acquisition: removes the coder from the queue,
  * marks the dongle as used, prints "has taken a dongle" under
@@ -117,7 +118,7 @@ int	take_dongle_finish(t_coder *coder, t_dongle *dongle, int ok)
 	if (!ok)
 	{
 		pthread_cond_broadcast(&dongle->dongle_cond);
-		pthread_mutex_unlock(&dongle->dongle_lock);
+		safe_mutex_unlock(&dongle->dongle_lock);
 		return (0);
 	}
 	dongle->is_used = 1;
@@ -125,11 +126,11 @@ int	take_dongle_finish(t_coder *coder, t_dongle *dongle, int ok)
 	if (!coder->sim->is_running)
 	{
 		pthread_cond_broadcast(&dongle->dongle_cond);
-		pthread_mutex_unlock(&dongle->dongle_lock);
+		safe_mutex_unlock(&dongle->dongle_lock);
 		return (0);
 	}
 	log_action("has taken a dongle", coder->id);
-	pthread_mutex_unlock(&dongle->dongle_lock);
+	safe_mutex_unlock(&dongle->dongle_lock);
 	return (1);
 }
 
@@ -140,9 +141,9 @@ int	take_dongle_finish(t_coder *coder, t_dongle *dongle, int ok)
  */
 void	release_dongle(t_dongle *dongle)
 {
-	pthread_mutex_lock(&dongle->dongle_lock);
+	safe_mutex_lock(&dongle->dongle_lock);
 	dongle->is_used = 0;
 	dongle->last_used = get_time();
 	pthread_cond_broadcast(&dongle->dongle_cond);
-	pthread_mutex_unlock(&dongle->dongle_lock);
+	safe_mutex_unlock(&dongle->dongle_lock);
 }

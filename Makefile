@@ -1,7 +1,7 @@
 NAME = codexion
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -pthread
+CFLAGS = -Wall -Wextra -Werror -pthread -g
 INCLUDES = -Isrc/include
 HEADER   = src/include/inc.h
 
@@ -14,8 +14,12 @@ SRC = \
 	src/coders/burnout.c \
 	src/utils/time.c \
 	src/utils/init.c \
+	src/utils/init_dongle.c \
+	src/utils/init_coders.c \
 	src/utils/queue.c \
 	src/utils/print.c \
+	src/utils/log_suppress.c \
+	src/utils/safe.c \
 	src/dongle/dongle.c
 
 OBJ = $(SRC:.c=.o)
