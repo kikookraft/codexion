@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 17:02:59 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/22 17:21:11 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/23 18:32:09 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -123,12 +123,6 @@ int	take_dongle_finish(t_coder *coder, t_dongle *dongle, int ok)
 	}
 	dongle->is_used = 1;
 	dongle->last_user = coder->id;
-	if (!coder->sim->is_running)
-	{
-		pthread_cond_broadcast(&dongle->dongle_cond);
-		safe_mutex_unlock(&dongle->dongle_lock);
-		return (0);
-	}
 	log_action("has taken a dongle", coder->id);
 	safe_mutex_unlock(&dongle->dongle_lock);
 	return (1);

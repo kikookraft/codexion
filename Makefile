@@ -1,8 +1,7 @@
 NAME = codexion
 
 CC = cc
-CFLAGS = -Wall -Wextra -Werror -pthread -g
-INCLUDES = -Isrc/include
+CFLAGS = -Wall -Wextra -Werror -pthreadrc/include
 HEADER   = src/include/inc.h
 
 SRC = \

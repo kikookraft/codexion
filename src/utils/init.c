@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/05/19 14:35:48 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/22 15:28:49 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/23 16:40:15 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -30,6 +30,7 @@ t_sim	*init_sim(char *argv[])
 	if (safe_mutex_init(&sim->print_lock)
 		|| safe_mutex_init(&sim->sim_lock))
 	{
+		pthread_mutex_destroy(&sim->print_lock);
 		free(sim);
 		return (NULL);
 	}
