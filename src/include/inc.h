@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/04/16 11:22:05 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/22 15:28:49 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/23 18:39:49 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -125,12 +125,11 @@ int			timedwait_or_timeout(t_dongle *dongle, size_t deadline);
 // ----- simulation.c -----
 int			is_simulation_running(t_sim *sim);
 int			start_simulation(t_sim *sim);
-void		end_simulation(t_sim *sim, int coder_id);
 void		cleanup_sim(t_sim *sim);
 
 // ----- burnout.c -----
 void		*burnout_monitor(void *arg);
-void		stop_and_broadcast(t_sim *sim);
+void		stop_and_broadcast(t_sim *sim, int coder_id);
 int			has_coder_burned_out(t_coder *coder);
 
 // ---- print.c -----

@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/19 15:45:54 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/23 18:31:27 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/23 18:39:49 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -70,25 +70,6 @@ int	is_simulation_running(t_sim *sim)
 	running = sim->is_running;
 	safe_mutex_unlock(&sim->sim_lock);
 	return (running);
-}
-
-/*
- * Stops the simulation: acquires print_lock to block any in-flight
- * coder messages, suppresses future logs, prints the burnout message
- * directly under the lock (so it cannot be followed by coder output),
- * then broadcasts all dongle conditions so waiting threads exit.
- */
-void	end_simulation(t_sim *sim, int coder_id)
-{
-	print_lock(1);
-	suppress_logs();
-	printf("%-5zu %-5d \033[31mhas burned out\033[0m\n",
-		get_elapsed_time(), coder_id + 1);
-	print_lock(0);
-	safe_mutex_lock(&sim->sim_lock);
-	sim->burned_out_coder = coder_id;
-	safe_mutex_unlock(&sim->sim_lock);
-	stop_and_broadcast(sim);
 }
 
 /*

@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/02 12:32:36 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/23 18:31:30 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/23 18:39:49 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -32,9 +32,8 @@ static int	check_burnouts(t_sim *sim, size_t current_time)
 
 /*
  * Monitor thread: polls every 1 ms under sim_lock. If a coder
- * has burned out, calls end_simulation to stop the simulation.
- * The burnout message is printed later in start_simulation
- * after all coder threads have joined, preventing log races.
+ * has burned out, calls stop_and_broadcast to print the burnout
+ * message and stop the simulation.
  */
 void	*burnout_monitor(void *arg)
 {
@@ -54,7 +53,7 @@ void	*burnout_monitor(void *arg)
 		safe_mutex_unlock(&sim->sim_lock);
 		if (burnout_coder >= 0)
 		{
-			end_simulation(sim, burnout_coder);
+			stop_and_broadcast(sim, burnout_coder);
 			break ;
 		}
 		usleep(1000);
@@ -63,15 +62,22 @@ void	*burnout_monitor(void *arg)
 }
 
 /*
- * Sets is_running = 0 under sim_lock, then broadcasts on every
+ * Prints the burnout message under print_lock with log suppression,
+ * sets is_running = 0 under sim_lock, and broadcasts on every
  * dongle condition variable to wake all blocked coder threads.
  */
-void	stop_and_broadcast(t_sim *sim)
+void	stop_and_broadcast(t_sim *sim, int coder_id)
 {
 	int	i;
 
+	print_lock(1);
+	suppress_logs();
+	printf("%-5zu %-5d \033[31mhas burned out\033[0m\n",
+		get_elapsed_time(), coder_id + 1);
+	print_lock(0);
 	safe_mutex_lock(&sim->sim_lock);
 	sim->is_running = 0;
+	sim->burned_out_coder = coder_id;
 	safe_mutex_unlock(&sim->sim_lock);
 	i = -1;
 	while (++i < (int)sim->nb_coders)
