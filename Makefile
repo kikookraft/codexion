@@ -40,6 +40,4 @@ fclean: clean
 
 re: fclean all
 
-run: re
-	./$(NAME) 2 20 0 0 0 1 0 edf
 .PHONY: all clean fclean re
