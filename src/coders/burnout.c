@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/02 12:32:36 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/23 18:39:49 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/25 14:08:48 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -95,7 +95,8 @@ void	stop_and_broadcast(t_sim *sim, int coder_id)
 int	has_coder_burned_out(t_coder *coder)
 {
 	safe_mutex_lock(&coder->coder_lock);
-	if (get_time() - coder->last_compile_start >= coder->sim->burnout_time)
+	if (get_time() - coder->last_compile_start >= coder->sim->burnout_time
+		&& ((unsigned int) coder->times_compiled < coder->sim->target_compiles))
 	{
 		safe_mutex_unlock(&coder->coder_lock);
 		return (1);
