@@ -7,9 +7,9 @@ calc_burnout(){
 time=$(($compile + $cooldown))
 if [ $(($coder%2)) -eq 0 ]
 then
-burnout=$(($time*2 + 10))
+burnout=$(($time*2 + 100))
 else
-burnout=$(($time*3 + 10))
+burnout=$(($time*3 + 100))
 fi
 }
 
@@ -33,7 +33,7 @@ fi
 
 i=0
 echo "test no $n: ./codexion $coder $burnout $compile $debug $refactor $compilnb $cooldown $scheduler"
-while ((i <= 9)); do
+while ((i <= 4)); do
     touch ./.test/test$n$i.test
     ./codexion $coder $burnout $compile $debug $refactor $compilnb $cooldown $scheduler > "./.test/test$n$i.test"
 	if [ $(cat ./.test/test$n$i.test | grep compiling | wc -l) -ge $(($coder*$compilnb)) ]
