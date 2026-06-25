@@ -6,7 +6,7 @@
 /*   By: tobesson <tobesson@student.42lyon.fr>      +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2026/06/02 12:32:36 by tobesson          #+#    #+#             */
-/*   Updated: 2026/06/25 14:08:48 by tobesson         ###   ########.fr       */
+/*   Updated: 2026/06/25 15:07:47 by tobesson         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -72,7 +72,7 @@ void	stop_and_broadcast(t_sim *sim, int coder_id)
 
 	print_lock(1);
 	suppress_logs();
-	printf("%-5zu %-5d \033[31mhas burned out\033[0m\n",
+	printf("%-5zu %-5d \033[31mburned out\033[0m\n",
 		get_elapsed_time(), coder_id + 1);
 	print_lock(0);
 	safe_mutex_lock(&sim->sim_lock);
